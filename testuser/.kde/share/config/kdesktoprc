@@ -17,7 +17,7 @@ Pattern=
 Program=
 ReverseBlending=false
 UseSHM=false
-Wallpaper=/Files/Wallpapers/GoboWater.svg
+Wallpaper=/Data/Wallpapers/GoboWater.svg
 WallpaperList=
 WallpaperMode=Scaled
 
@@ -31,7 +31,7 @@ AutoLineUpIcons=true
 
 [KFileDialog Settings]
 Automatic Preview=true
-Recent Files=/Files/Wallpapers/GoboWater.svg
+Recent Files=/Data/Wallpapers/GoboWater.svg
 
 [Menubar]
 ShowMenubar=false

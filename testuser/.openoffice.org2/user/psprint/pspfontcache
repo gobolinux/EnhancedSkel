@@ -1,5 +1,5 @@
 PspFontCacheFile format 3
-FontCacheDirectory:1066106288:/Files/Fonts/Ghostscript
+FontCacheDirectory:1066106288:/Data/Fonts/Ghostscript
 File:n021024l.pfb
 1;1
 Nimbus Roman No9 L
@@ -215,7 +215,7 @@ File:c059016l.pfb
 Century Schoolbook L
 -1;CenturySchL-Bold;0;8;0;2;91;1005;372;377;0;1000;722;1000;722;0;1;1;c059016l.afm;Bold
 
-FontCacheDirectory:1066106288:/Files/Fonts/OpenType
+FontCacheDirectory:1066106288:/Data/Fonts/OpenType
 File:SyrCOMEdessa.otf
 2;1
 Estrangelo Edessa
@@ -326,7 +326,7 @@ File:SyrCOMNisibin.otf
 Estrangelo Nisibin
 -1;EstrangeloNisibin;0;5;5;2;65535;761;316;77;0;1000;1077;1000;1077;0;1;1;12;Regular
 
-FontCacheDirectory:1066106289:/Files/Fonts/TrueType
+FontCacheDirectory:1066106289:/Data/Fonts/TrueType
 File:VeraSe.ttf
 2;1
 Bitstream Vera Serif
