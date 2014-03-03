@@ -1,0 +1,8 @@
+[EdgePositions]
+Offset=0.5
+
+[Interface]
+Size=420,500
+
+[PlasmaRunnerManager]
+LaunchCounts=1 shell_xterm
