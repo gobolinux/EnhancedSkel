@@ -1,0 +1,77 @@
+[Devices][/org/freedesktop/UDisks2/block_devices/loop0]
+EverMounted=true
+Icon=drive-harddisk
+LastNameSeen=Loop Device
+LastSeenMounted=true
+
+[Devices][/org/freedesktop/UDisks2/block_devices/loop1]
+EverMounted=true
+Icon=drive-harddisk
+LastNameSeen=Loop Device
+LastSeenMounted=true
+
+[Devices][/org/freedesktop/UDisks2/block_devices/loop2]
+EverMounted=true
+Icon=drive-harddisk
+LastNameSeen=Loop Device
+LastSeenMounted=true
+
+[Devices][/org/freedesktop/UDisks2/block_devices/loop3]
+EverMounted=true
+Icon=drive-harddisk
+LastNameSeen=Loop Device
+LastSeenMounted=true
+
+[Devices][/org/freedesktop/UDisks2/block_devices/loop4]
+EverMounted=true
+Icon=drive-harddisk
+LastNameSeen=Loop Device
+LastSeenMounted=true
+
+[Devices][/org/freedesktop/UDisks2/block_devices/loop5]
+EverMounted=true
+Icon=drive-harddisk
+LastNameSeen=Loop Device
+LastSeenMounted=true
+
+[Devices][/org/freedesktop/UDisks2/block_devices/ram0]
+EverMounted=true
+Icon=drive-harddisk
+LastNameSeen=Compressed
+LastSeenMounted=true
+
+[Devices][/org/freedesktop/UDisks2/block_devices/sda1]
+Icon=drive-harddisk
+LastNameSeen=DellUtility
+LastSeenMounted=false
+
+[Devices][/org/freedesktop/UDisks2/block_devices/sda2]
+Icon=drive-harddisk
+LastNameSeen=RECOVERY
+LastSeenMounted=false
+
+[Devices][/org/freedesktop/UDisks2/block_devices/sda3]
+Icon=drive-harddisk
+LastNameSeen=OS
+LastSeenMounted=false
+
+[Devices][/org/freedesktop/UDisks2/block_devices/sda4]
+Icon=drive-harddisk
+LastNameSeen=192.8 GiB Hard Drive
+LastSeenMounted=false
+
+[Devices][/org/freedesktop/UDisks2/block_devices/sdb]
+EverMounted=true
+Icon=drive-removable-media-usb
+LastNameSeen=CDROM
+LastSeenMounted=true
+
+[Devices][/org/freedesktop/UDisks2/block_devices/sdb1]
+Icon=drive-removable-media-usb
+LastNameSeen=CDROM
+LastSeenMounted=false
+
+[Devices][/org/freedesktop/UDisks2/block_devices/sdc1]
+Icon=drive-removable-media-usb-pendrive
+LastNameSeen=KINGSTON
+LastSeenMounted=false

@@ -1,0 +1,22 @@
+[General]
+screenCount=1
+
+[LegacySession: saved at previous logout]
+count=0
+
+[Session: saved at previous logout]
+clientId1=108fad7665000139380328900000040460000
+clientId2=108fad7665000139380329900000040460009
+count=2
+discardCommand1[$e]=rm,$HOME/.kde/share/config/session/kwin_108fad7665000139380328900000040460000_1393803749_232061
+discardCommand2[$e]=rm,$HOME/.kde/share/config/session/kmix_108fad7665000139380329900000040460009_1393803749_224318
+program1=kwin
+program2=/usr/bin/kmix
+restartCommand1=kwin,-session,108fad7665000139380328900000040460000_1393803749_232061
+restartCommand2=/usr/bin/kmix,-session,108fad7665000139380329900000040460009_1393803749_224318
+restartStyleHint1=0
+restartStyleHint2=0
+userId1=gobo
+userId2=gobo
+wasWm1=true
+wasWm2=false

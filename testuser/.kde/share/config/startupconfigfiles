@@ -1,0 +1,72 @@
+kcminputrc Mouse cursorTheme 'Oxygen_White'
+!/Users/gobo/.kde/share/config/kcminputrc
+!/usr/share/config/kcminputrc
+!/Programs/KDE-Libs/4.12.0/share/config/kcminputrc
+!/Programs/KDE-Workspace/4.11.5/share/config/kcminputrc
+*
+kcminputrc Mouse cursorSize ''
+!/Users/gobo/.kde/share/config/kcminputrc
+!/usr/share/config/kcminputrc
+!/Programs/KDE-Libs/4.12.0/share/config/kcminputrc
+!/Programs/KDE-Workspace/4.11.5/share/config/kcminputrc
+*
+ksplashrc KSplash Theme Default
+!/Users/gobo/.kde/share/config/ksplashrc
+!/usr/share/config/ksplashrc
+!/Programs/KDE-Libs/4.12.0/share/config/ksplashrc
+!/Programs/KDE-Workspace/4.11.5/share/config/ksplashrc
+*
+ksplashrc KSplash Engine KSplashX
+!/Users/gobo/.kde/share/config/ksplashrc
+!/usr/share/config/ksplashrc
+!/Programs/KDE-Libs/4.12.0/share/config/ksplashrc
+!/Programs/KDE-Workspace/4.11.5/share/config/ksplashrc
+*
+krandrrc Display ApplyOnStartup false
+!/Users/gobo/.kde/share/config/krandrrc
+!/usr/share/config/krandrrc
+!/Programs/KDE-Libs/4.12.0/share/config/krandrrc
+!/Programs/KDE-Workspace/4.11.5/share/config/krandrrc
+*
+krandrrc Display StartupCommands ''
+!/Users/gobo/.kde/share/config/krandrrc
+!/usr/share/config/krandrrc
+!/Programs/KDE-Libs/4.12.0/share/config/krandrrc
+!/Programs/KDE-Workspace/4.11.5/share/config/krandrrc
+*
+krandrrc [Screen0]
+!/Users/gobo/.kde/share/config/krandrrc
+!/usr/share/config/krandrrc
+!/Programs/KDE-Libs/4.12.0/share/config/krandrrc
+!/Programs/KDE-Workspace/4.11.5/share/config/krandrrc
+*
+krandrrc [Screen1]
+!/Users/gobo/.kde/share/config/krandrrc
+!/usr/share/config/krandrrc
+!/Programs/KDE-Libs/4.12.0/share/config/krandrrc
+!/Programs/KDE-Workspace/4.11.5/share/config/krandrrc
+*
+krandrrc [Screen2]
+!/Users/gobo/.kde/share/config/krandrrc
+!/usr/share/config/krandrrc
+!/Programs/KDE-Libs/4.12.0/share/config/krandrrc
+!/Programs/KDE-Workspace/4.11.5/share/config/krandrrc
+*
+krandrrc [Screen3]
+!/Users/gobo/.kde/share/config/krandrrc
+!/usr/share/config/krandrrc
+!/Programs/KDE-Libs/4.12.0/share/config/krandrrc
+!/Programs/KDE-Workspace/4.11.5/share/config/krandrrc
+*
+kcmfonts General forceFontDPI 0
+!/Users/gobo/.kde/share/config/kcmfonts
+!/usr/share/config/kcmfonts
+!/Programs/KDE-Libs/4.12.0/share/config/kcmfonts
+!/Programs/KDE-Workspace/4.11.5/share/config/kcmfonts
+*
+kdeglobals Locale Language '' # trigger requesting languages from KLocale
+!/Users/gobo/.kde/share/config/kdeglobals
+!/usr/share/config/kdeglobals
+!/Programs/KDE-Libs/4.12.0/share/config/kdeglobals
+!/Programs/KDE-Workspace/4.11.5/share/config/kdeglobals
+*
