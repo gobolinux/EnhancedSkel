@@ -15,7 +15,7 @@ panelVisibility=0
 lastsize=1366
 
 [Updates]
-performed=/System/Links/Shared/apps/plasma-desktop/updates/addShowActivitiesManagerPlasmoid.js,/System/Links/Shared/apps/plasma-desktop/updates/set-hidden-single-vd-pager.js,/System/Links/Shared/apps/plasma-desktop/updates/systray-to-notifications-widget.js
+performed=/System/Index/share/apps/plasma-desktop/updates/addShowActivitiesManagerPlasmoid.js,/System/Index/share/apps/plasma-desktop/updates/set-hidden-single-vd-pager.js,/System/Index/share/apps/plasma-desktop/updates/systray-to-notifications-widget.js
 
 [ViewIds]
 1=1
