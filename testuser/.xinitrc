@@ -1,7 +1,7 @@
 # Workaround for broken input device detection
 [ -e /bin/udevadm ] && udevadm trigger
 # Update the MIME database
-[ -e /bin/update-mime-database -a "x$HOSTNAME" = "xLiveCD" ] && \
+[ -e /bin/update-mime-database ] && \
     update-mime-database /Data/Variable/xdg/mime | grep -v Unknown
 
 [ -x /bin/startkde ] && exec dbus-launch --exit-with-session startkde
