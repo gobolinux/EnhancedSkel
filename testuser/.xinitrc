@@ -4,6 +4,7 @@
 [ -e /bin/update-mime-database ] && \
     update-mime-database /Data/Variable/xdg/mime | grep -v Unknown
 
+[ -x /bin/enlightenment_start ] && exec dbus-launch --exit-with-session enlightenment_start
 [ -x /bin/startkde ] && exec dbus-launch --exit-with-session startkde
 [ -x /bin/wmaker ] && exec wmaker
 [ -x /bin/twm    ] && { 
