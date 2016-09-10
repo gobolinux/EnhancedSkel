@@ -1,8 +1,0 @@
-[%General]
-Driver=QSQLITE3
-
-[QSQLITE3]
-Name=/Users/testuser/.local/share/akonadi/akonadi.db
-
-[Debug]
-Tracer=null
