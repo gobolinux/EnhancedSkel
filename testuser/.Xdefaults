@@ -7,5 +7,7 @@ URxvt.iso14755: false
 URxvt.iso14755_52: false
 URxvt.colorBD: #fff
 URxvt.colorIT: #ddf
+
 URxvt.scrollColor: #508080
+URxvt*color3: #ffff30
 URxvt*color12: #3030ff

@@ -1,0 +1,291 @@
+
+local utils = {}
+
+local dirs = require("freedesktop.dirs")
+
+utils.terminal = terminal or 'xterm'
+
+utils.icon_theme = nil
+
+utils.all_icon_sizes = {
+    '128x128',
+    '96x96',
+    '72x72',
+    '64x64',
+    '48x48',
+    '36x36',
+    '32x32',
+    '24x24',
+    '22x22',
+    '16x16'
+}
+utils.all_icon_types = {
+    'apps',
+    'actions',
+    'devices',
+    'places',
+    'categories',
+    'status',
+    'mimetypes'
+}
+utils.all_icon_paths = {}
+
+local mime_types = {}
+
+local function _init_all_icon_paths()
+    for _,dir in ipairs({ os.getenv("HOME") .. '/.icons/',
+                          dirs.xdg_data_home() .. 'icons/'}) do
+        if utils.directory_exists(dir) then
+            table.insert(utils.all_icon_paths, dir)
+        end
+    end
+    for _,dir in ipairs(dirs.xdg_data_dirs()) do
+        if utils.directory_exists(dir .. 'icons/') then
+            table.insert(utils.all_icon_paths, dir .. 'icons/')
+        end
+    end
+end
+
+function utils.get_lines(...)
+    local f = io.popen(...)
+    return function () -- iterator
+        local data = f:read()
+        if data == nil then f:close() end
+        return data
+    end
+end
+
+function utils.directory_exists(filename)
+    local file = io.open(filename)
+    local result = (file ~= nil)
+    if result then
+        local a,b,c = file:read(0)
+        file:close()
+        result = (c == 21)
+    end
+    return result
+end
+
+function utils.file_exists(filename)
+    local file = io.open(filename, 'r')
+    local result = (file ~= nil)
+    if result then
+        file:close()
+    end
+    return result
+end
+
+function utils.lookup_icon(arg)
+    if arg.icon:sub(1, 1) == '/' and (arg.icon:find('.+%.png') or arg.icon:find('.+%.xpm')) then
+        -- icons with absolute path and supported (AFAICT) formats
+        return arg.icon
+    else
+        local icon_path = {}
+        local icon_themes = {}
+        local icon_theme_paths = {}
+        if utils.icon_theme and type(utils.icon_theme) == 'table' then
+            icon_themes = {}
+            for k,v in pairs(utils.icon_theme) do
+                icon_themes[k] = v
+            end
+        elseif utils.icon_theme then
+            icon_themes = { utils.icon_theme }
+        end
+        table.insert(icon_themes, 'hicolor')
+        for i, theme in ipairs(icon_themes) do
+            for j, path in ipairs(utils.all_icon_paths) do
+                if utils.directory_exists(path .. theme) then
+                    table.insert(icon_theme_paths, path .. theme .. '/')
+                end
+            end
+            -- TODO also look in parent icon themes, as in freedesktop.org specification
+        end
+
+        local isizes = {}
+        for i, sz in ipairs(utils.all_icon_sizes) do
+            table.insert(isizes, sz)
+        end
+
+        for i, icon_theme_directory in ipairs(icon_theme_paths) do
+            for j, size in ipairs(arg.icon_sizes or isizes) do
+                if utils.directory_exists(icon_theme_directory .. size) then
+                    for k, icon_type in ipairs(utils.all_icon_types) do
+                        local p = icon_theme_directory .. size .. '/' .. icon_type
+                        if utils.directory_exists(p) then
+                            table.insert(icon_path, p .. '/')
+                        end
+                    end
+                end
+            end
+        end
+        -- lowest priority fallback
+        table.insert(icon_path,  '/usr/share/pixmaps/')
+
+        for i, directory in ipairs(icon_path) do
+            if (arg.icon:find('.+%.png') or arg.icon:find('.+%.xpm')) and utils.file_exists(directory .. arg.icon) then
+                return directory .. arg.icon
+            elseif utils.file_exists(directory .. arg.icon .. '.png') then
+                return directory .. arg.icon .. '.png'
+            elseif utils.file_exists(directory .. arg.icon .. '.xpm') then
+                return directory .. arg.icon .. '.xpm'
+            end
+        end
+    end
+end
+
+function utils.lookup_file_icon(arg)
+    utils.load_mime_types()
+
+    local extension = arg.filename:match('%a+$')
+    local mime = mime_types[extension] or ''
+    local mime_family = mime:match('^%a+') or ''
+
+    -- possible icons in a typical gnome theme (i.e. Tango icons)
+    local possible_filenames = {
+        mime,
+        'gnome-mime-' .. mime,
+        mime_family,
+        'gnome-mime-' .. mime_family,
+        extension
+    }
+
+    for i, filename in ipairs(possible_filenames) do
+        local icon = utils.lookup_icon({icon = filename, icon_sizes = (arg.icon_sizes or utils.all_icon_sizes)})
+        if icon then
+            return icon
+        end
+    end
+
+    -- If we don't find ad icon, then pretend is a plain text file
+    return utils.lookup_icon({ icon = 'txt', icon_sizes = arg.icon_sizes or utils.all_icon_sizes })
+end
+
+--- Load system MIME types
+-- @return A table with file extension <--> MIME type mapping
+function utils.load_mime_types()
+    if #mime_types == 0 then
+        for line in io.lines('/etc/mime.types') do
+            if not line:find('^#') then
+                local parsed = {}
+                for w in line:gmatch('[^%s]+') do
+                    table.insert(parsed, w)
+                end
+                if #parsed > 1 then 
+                    for i = 2, #parsed do
+                        mime_types[parsed[i]] = parsed[1]:gsub('/', '-')
+                    end
+                end
+            end
+        end
+    end
+end
+
+--- Parse a .desktop file
+-- @param file The .desktop file
+-- @param requested_icon_sizes A list of icon sizes (optional). If this list is given, it will be used as a priority list for icon sizes when looking up for icons. If you want large icons, for example, you can put '128x128' as the first item in the list.
+-- @return A table with file entries.
+function utils.parse_desktop_file(arg)
+    local program = { show = true, file = arg.file }
+    local parsing = false
+    for line in io.lines(arg.file) do
+        local section = line:lower():match("^%[(.*)%]$")
+        if section then
+            parsing = (section == "desktop entry")
+        end
+        if parsing then
+            local key, value = line:match("^(%w+)=(.+)$")
+            if key then
+                program[key] = value
+            end
+        end
+    end
+
+    -- Don't show the program if NoDisplay is true
+    -- Only show the program if there is not OnlyShowIn attribute
+    -- or if it's equal to 'awesome'
+    if program.NoDisplay == "true" or program.OnlyShowIn ~= nil and program.OnlyShowIn ~= "awesome" then
+        program.show = false
+    end
+
+    -- Look up for a icon.
+    if program.Icon then
+        program.icon_path = utils.lookup_icon({ icon = program.Icon, icon_sizes = (arg.icon_sizes or utils.all_icon_sizes) })
+        if program.icon_path ~= nil and not utils.file_exists(program.icon_path) then
+           program.icon_path = nil
+        end
+    end
+
+    -- Split categories into a table.
+    if program.Categories then
+        program.categories = {}
+        for category in program.Categories:gmatch('[^;]+') do
+            table.insert(program.categories, category)
+        end
+    end
+
+    if program.Exec then
+        local cmdline = program.Exec:gsub('%%c', program.Name)
+        cmdline = cmdline:gsub('%%[fmuFMU]', '')
+        cmdline = cmdline:gsub('%%k', program.file)
+        if program.icon_path then
+            cmdline = cmdline:gsub('%%i', '--icon ' .. program.icon_path)
+        else
+            cmdline = cmdline:gsub('%%i', '')
+        end
+        if program.Terminal == "true" then
+            cmdline = utils.terminal .. ' -e ' .. cmdline
+        end
+        program.cmdline = cmdline
+    end
+
+    return program
+end
+
+--- Parse a directory with .desktop files
+-- @param dir The directory.
+-- @param icons_size, The icons sizes, optional.
+-- @return A table with all .desktop entries.
+function utils.parse_desktop_files(arg)
+    local programs = {}
+    local files = utils.get_lines('find '.. arg.dir ..' -name "*.desktop" 2>/dev/null')
+    for file in files do
+        arg.file = file
+        table.insert(programs, utils.parse_desktop_file(arg))
+    end
+    return programs
+end
+
+--- Parse a directory files and subdirs
+-- @param dir The directory.
+-- @param icons_size, The icons sizes, optional.
+-- @return A table with all .desktop entries.
+function utils.parse_dirs_and_files(arg)
+    local files = {}
+    local paths = utils.get_lines('find '..arg.dir..' -maxdepth 1 -type d')
+    for path in paths do
+        if path:match("[^/]+$") then
+            local file = {}
+            file.filename = path:match("[^/]+$")
+            file.path = path
+            file.show = true
+            file.icon = utils.lookup_icon({ icon = "folder", icon_sizes = (arg.icon_sizes or utils.all_icon_sizes) })
+            table.insert(files, file)
+        end
+    end
+    paths = utils.get_lines('find '..arg.dir..' -maxdepth 1 -type f')
+    for path in paths do
+        if not path:find("%.desktop$") then
+            local file = {}
+            file.filename = path:match("[^/]+$")
+            file.path = path
+            file.show = true
+            file.icon = utils.lookup_file_icon({ filename = file.filename, icon_sizes = (arg.icon_sizes or utils.all_icon_sizes) })
+            table.insert(files, file)
+        end
+    end
+    return files
+end
+
+_init_all_icon_paths()
+
+return utils
