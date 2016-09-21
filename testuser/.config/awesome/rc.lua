@@ -129,6 +129,7 @@ local myawesomemenu = {
 
 local mymainmenu = awful.menu({ items = awful.util.table.join(
                                     { { "Awesome WM", myawesomemenu, beautiful.awesome_icon },
+                                      { "Run...", function() menubar.show() end },
                                       { "Open Terminal", terminal }
                                     },
                                     freedesktop.menu.new()
@@ -322,7 +323,7 @@ local globalkeys = awful.util.table.join(
     awful.key({ modkey, "Control" }, "n", awful.client.restore),
 
     -- Prompt
-    awful.key({ modkey },            "r",     function () mypromptbox[mouse.screen or 0]:run() end),
+    awful.key({ modkey },          "r",     function () menubar.show() end),
 
     awful.key({ ALT },            "F2",     function () menubar.show() end),
 
