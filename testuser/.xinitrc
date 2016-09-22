@@ -1,3 +1,5 @@
+xsetroot -solid '#000000' -cursor_name 'left_ptr'
+
 # Workaround for broken input device detection
 [ -e /bin/udevadm ] && udevadm trigger
 # Update the MIME database
