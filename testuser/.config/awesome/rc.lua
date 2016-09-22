@@ -12,9 +12,10 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 local wifi = require("wifi")
 local alttab = require("alttab")
-local freedesktop = {
-    menu = require("freedesktop.menu")
-}
+
+local menu_gen = require("menubar.menu_gen")
+local icon_theme = require("menubar.icon_theme")
+
 -- C API
 local screen = screen
 local mouse = mouse
@@ -129,13 +130,28 @@ local myawesomemenu = {
 
 local mymainmenu = awful.menu({ items = awful.util.table.join(
                                     { { "Awesome WM", myawesomemenu, beautiful.awesome_icon },
-                                      { "Run...", function() menubar.show() end },
+                                      { "Run...", function() menubar.show() end, nil },
                                       { "Open Terminal", terminal }
-                                    },
-                                    freedesktop.menu.new()
+                                    }
                                   ),
                            theme = { width = 300, height = 32 },
                         })
+menu_gen.generate(function(entries)
+    local cat_keys = {}
+    local cat_submenus = {}
+    for k, _ in pairs(menu_gen.all_categories) do
+        table.insert(cat_keys, k)
+        cat_submenus[k] = {}
+    end
+    for _, entry in ipairs(entries) do
+        table.insert(cat_submenus[entry.category], { entry.name, entry.cmdline, entry.icon })
+    end
+    table.sort(cat_keys)
+    for _, k in ipairs(cat_keys) do
+        local cat = menu_gen.all_categories[k]
+        mymainmenu:add({ cat.name, cat_submenus[k], icon_theme():find_icon_path(cat.icon_name) })
+    end
+end)
 
 local mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
                                      menu = mymainmenu })
@@ -266,6 +282,7 @@ end
 
 -- {{{ Mouse bindings
 root.buttons(awful.util.table.join(
+    awful.button({ }, 1, function () mymainmenu:hide() end),
     awful.button({ }, 3, function () mymainmenu:toggle() end)
     --awful.button({ }, 4, awful.tag.viewnext),
     --awful.button({ }, 5, awful.tag.viewprev)
