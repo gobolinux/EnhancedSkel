@@ -1,13 +1,14 @@
 
 local wifi = {}
 
-local timer = timer
+local gears = require("gears")
+local timer = gears.timer or timer
 local mouse = mouse
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local naughty = require("naughty")
-local async = require("async")
+local spawn = require("awful.spawn")
 
 local function pread(cmd)
    local pd = io.popen(cmd, "r")
@@ -77,10 +78,15 @@ function wifi.new()
          if is_waiting() then
             return is_waiting
          end
-         waiting = async.addthread(function()
-            os.execute(cmd)
-            return true
-         end)
+         do
+            local done = false
+            waiting = function()
+               return done
+            end
+            spawn.easy_async(cmd, function()
+               done = true
+            end)
+         end
          local frames = {
             beautiful.wifi_0_icon,
             beautiful.wifi_1_icon,
