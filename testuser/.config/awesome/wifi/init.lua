@@ -48,8 +48,8 @@ local function quality_icon(quality)
    end
 end
 
-local function disconnect(essid)
-   awful.util.spawn_with_shell("gobonet disconnect '"..essid:gsub("'", "'\\''").."' &")
+local function disconnect()
+   awful.util.spawn_with_shell("gobonet disconnect &")
 end
 
 local function forget(essid)
@@ -186,7 +186,7 @@ function wifi.new()
       end)
       if my_essid then
          local disconnect_msg = is_connecting() and " Cancel connecting to " or " Disconnect "
-         table.insert(entries, 1, { disconnect_msg .. my_essid, function() disconnect(my_essid) end })
+         table.insert(entries, 1, { disconnect_msg .. my_essid, function() disconnect() end })
          table.insert(entries, 2, { " Forget " .. my_essid, function() forget(my_essid) end })
       end
       if is_scanning() then
