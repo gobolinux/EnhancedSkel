@@ -10,11 +10,11 @@ local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
-local wifi = require("wifi")
-local alttab = require("alttab")
-
 local menu_gen = require("menubar.menu_gen")
 local icon_theme = require("menubar.icon_theme")
+
+local wifi = require("wifi")
+local alttab = require("alttab")
 
 -- C API
 local screen = screen
@@ -24,13 +24,24 @@ local awesome = awesome
 local root = root
 local mousegrabber = mousegrabber
 
-local terminal = "urxvt -cr green -fn '*-lode sans mono-*' -fb '*-lode sans mono-*' -fi '*-lode sans mono-*' -fbi '*-lode sans mono-*' -depth 32 -bg rgba:0000/0000/0000/dd77  -fg '#bcc' -sb -sr +st -sl 100000 -b 0 -tn rxvt"
+local terminal = "urxvt -cr green -fn '*-lode sans mono-*' -fb '*-lode sans mono-*' -fi '*-lode sans mono-*' -fbi '*-lode sans mono-*' -depth 32 -bg rgba:0000/0000/0000/e5bb  -fg '#bcc' -sb -sr +st -sl 100000 -b 0 -tn rxvt"
 local editor = os.getenv("EDITOR") or "nano"
 local editor_cmd = terminal .. " -e " .. editor
 local browser = "firefox"
 
+beautiful.init("~/.config/awesome/themes/neon/theme.lua")
+
+-- {{{ Variable definitions
+-- Themes define colours, icons, font and wallpapers.
 
 local ALT = "Mod1"
+
+-- Default modkey.
+-- Usually, Mod4 is the key with a logo between Control and Alt.
+-- If you do not like this or do not have such a key,
+-- I suggest you to remap Mod4 to another key using xmodmap or other tools.
+-- However, you can use another modifier like Mod1, but it may interact with others.
+local modkey = "Mod4"
 
 -- Launch compositor
 awful.util.spawn_with_shell("compton -cf "..
@@ -67,17 +78,6 @@ do
     end)
 end
 -- }}}
-
--- {{{ Variable definitions
--- Themes define colours, icons, font and wallpapers.
-beautiful.init("~/.config/awesome/themes/neon/theme.lua")
-
--- Default modkey.
--- Usually, Mod4 is the key with a logo between Control and Alt.
--- If you do not like this or do not have such a key,
--- I suggest you to remap Mod4 to another key using xmodmap or other tools.
--- However, you can use another modifier like Mod1, but it may interact with others.
-local modkey = "Mod4"
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 local layouts =
@@ -340,7 +340,7 @@ local globalkeys = awful.util.table.join(
     awful.key({ modkey, "Control" }, "n", awful.client.restore),
 
     -- Prompt
-    awful.key({ modkey },          "r",     function () menubar.show() end),
+    awful.key({ modkey },            "r",     function () menubar.show() end),
 
     awful.key({ ALT },            "F2",     function () menubar.show() end),
 
