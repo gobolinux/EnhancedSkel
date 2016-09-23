@@ -56,6 +56,19 @@ local function forget(essid)
    awful.util.spawn_with_shell("gobonet forget '"..essid:gsub("'", "'\\''").."' &")
 end
 
+local function compact_entries(entries)
+   local limit = 20
+   if #entries > limit then
+      local submenu = {}
+      for i = limit + 1, #entries do
+         table.insert(submenu, entries[i])
+         entries[i] = nil
+      end
+      compact_entries(submenu)
+      table.insert(entries, { "More...", submenu } )
+   end
+end
+
 function wifi.new()
    local widget = wibox.widget.imagebox()
    local menu
@@ -202,6 +215,7 @@ function wifi.new()
          len = math.max(len, (#entry[1] + 1) * 10 )
       end
       entries.theme = { height = 24, width = len }
+      compact_entries(entries)
       menu = awful.menu.new(entries)
       menu:show({ coords = coords })
    end
