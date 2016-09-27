@@ -716,6 +716,13 @@ client.connect_signal("manage", function (c, startup)
     end)
     ]]
 
+    c:connect_signal("button::press", function(c, x, y, button)
+        naughty.notify { text = "x "..x.." y "..y.." cx "..c.x.." cy "..c.y.." cw "..c.width.." ch "..c.height }
+        if button == 1 and (x < 0 or x >= c.width or y < 0 or y >= c.height) then
+            awful.mouse.client.resize(c)
+        end
+    end)
+
     if not startup then
         -- Set the windows at the slave,
         -- i.e. put it at the end of others instead of setting it master.
