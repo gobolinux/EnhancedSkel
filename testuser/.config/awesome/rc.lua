@@ -719,7 +719,7 @@ client.connect_signal("manage", function (c, startup)
     ]]
 
     c:connect_signal("button::press", function(c, x, y, button)
-        if button == 1 and (x < 0 or x >= c.width or y < 0 or y >= c.height) then
+        if not c.maximized and button == 1 and (x < 0 or x >= c.width or y < 0 or y >= c.height) then
             awful.mouse.client.resize(c)
         end
     end)
