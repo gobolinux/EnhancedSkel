@@ -139,17 +139,21 @@ local mymainmenu = awful.menu({ items = awful.util.table.join(
 menu_gen.generate(function(entries)
     local cat_keys = {}
     local cat_submenus = {}
+
     for k, _ in pairs(menu_gen.all_categories) do
         table.insert(cat_keys, k)
         cat_submenus[k] = {}
     end
+
     for _, entry in ipairs(entries) do
         table.insert(cat_submenus[entry.category], { entry.name, entry.cmdline, entry.icon })
     end
     table.sort(cat_keys)
     for _, k in ipairs(cat_keys) do
-        local cat = menu_gen.all_categories[k]
-        mymainmenu:add({ cat.name, cat_submenus[k], icon_theme():find_icon_path(cat.icon_name) })
+        if #cat_submenus[k] > 0 then
+            local cat = menu_gen.all_categories[k]
+            mymainmenu:add({ cat.name, cat_submenus[k], icon_theme():find_icon_path(cat.icon_name) })
+        end
     end
 end)
 
