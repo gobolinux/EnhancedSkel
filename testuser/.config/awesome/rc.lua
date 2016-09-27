@@ -1,3 +1,5 @@
+
+
 -- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
@@ -5,16 +7,14 @@ awful.rules = require("awful.rules")
 require("awful.autofocus")
 -- Widget and layout library
 local wibox = require("wibox")
--- Theme handling library
-local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
-local menu_gen = require("menubar.menu_gen")
-local icon_theme = require("menubar.icon_theme")
 
 local wifi = require("wifi")
 local alttab = require("alttab")
+local menu_gen = require("menubar.menu_gen")
+local icon_theme = require("menubar.icon_theme")
 
 -- C API
 local screen = screen
@@ -29,6 +29,8 @@ local editor = os.getenv("EDITOR") or "nano"
 local editor_cmd = terminal .. " -e " .. editor
 local browser = "firefox"
 
+-- Theme handling library
+local beautiful = require("beautiful")
 beautiful.init("~/.config/awesome/themes/neon/theme.lua")
 
 -- {{{ Variable definitions
@@ -717,7 +719,6 @@ client.connect_signal("manage", function (c, startup)
     ]]
 
     c:connect_signal("button::press", function(c, x, y, button)
-        naughty.notify { text = "x "..x.." y "..y.." cx "..c.x.." cy "..c.y.." cw "..c.width.." ch "..c.height }
         if button == 1 and (x < 0 or x >= c.width or y < 0 or y >= c.height) then
             awful.mouse.client.resize(c)
         end
