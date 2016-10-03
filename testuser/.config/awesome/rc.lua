@@ -1,5 +1,4 @@
 
-
 -- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
@@ -12,6 +11,8 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 
 local wifi = require("wifi")
+local sound = require("sound")
+local battery = require("battery")
 local alttab = require("alttab")
 local menu_gen = require("menubar.menu_gen")
 local icon_theme = require("menubar.icon_theme")
@@ -247,10 +248,10 @@ for s = 1, screen.count() do
     -- We need one layoutbox per screen.
     mylayoutbox[s] = awful.widget.layoutbox(s)
     mylayoutbox[s]:buttons(awful.util.table.join(
-                           awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
-                           awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
-                           awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
-                           awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end)))
+                           awful.button({ }, 1, function() awful.layout.inc(layouts, 1) end),
+                           awful.button({ }, 3, function() awful.layout.inc(layouts, -1) end),
+                           awful.button({ }, 4, function() awful.layout.inc(layouts, 1) end),
+                           awful.button({ }, 5, function() awful.layout.inc(layouts, -1) end)))
     ]]
     -- Create a taglist widget
     mytaglist[s] = awful.widget.taglist(s, awful.widget.taglist.filter.all, mytaglist.buttons)
@@ -272,6 +273,8 @@ for s = 1, screen.count() do
     if s == 1 then
         right_layout:add(wibox.widget.systray())
         right_layout:add(wifi.new())
+        right_layout:add(battery.new())
+        right_layout:add(sound.new())
     end
     right_layout:add(mytextclock)
     --right_layout:add(mylayoutbox[s])
@@ -288,8 +291,8 @@ end
 
 -- {{{ Mouse bindings
 root.buttons(awful.util.table.join(
-    awful.button({ }, 1, function () mymainmenu:hide() end),
-    awful.button({ }, 3, function () mymainmenu:toggle() end)
+    awful.button({ }, 1, function() mymainmenu:hide() end),
+    awful.button({ }, 3, function() mymainmenu:toggle() end)
     --awful.button({ }, 4, awful.tag.viewnext),
     --awful.button({ }, 5, awful.tag.viewprev)
 ))
