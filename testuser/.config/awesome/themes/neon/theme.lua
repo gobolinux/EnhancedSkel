@@ -9,6 +9,8 @@
 -- {{{ Main
 local theme = {}
 
+math.randomseed(os.time())
+
 -- {{{ Wallpaper
 --theme.wallpaper = "~/.config/awesome/themes/neon/wallpaper.png"
 --theme.wallpaper = "/Data/Wallpapers/TongariroColors.jpg"
