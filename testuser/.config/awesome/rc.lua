@@ -16,6 +16,7 @@ local battery = require("battery")
 local alttab = require("alttab")
 local menu_gen = require("menubar.menu_gen")
 local icon_theme = require("menubar.icon_theme")
+local hotkeys_popup = require("awful.hotkeys_popup.widget")
 
 -- C API
 local screen = screen
@@ -33,6 +34,10 @@ local browser = "firefox"
 -- Theme handling library
 local beautiful = require("beautiful")
 beautiful.init("~/.config/awesome/themes/neon/theme.lua")
+
+hotkeys_popup.title_font = "Lode Sans Mono Bold 12"
+hotkeys_popup.description_font = "Lode Sans Mono 12"
+hotkeys_popup.group_margin = 20
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
@@ -95,7 +100,7 @@ local layouts =
     awful.layout.suit.spiral,
     awful.layout.suit.spiral.dwindle,
     awful.layout.suit.max,
-    --awful.layout.suit.max.fullscreen,
+    awful.layout.suit.max.fullscreen,
     awful.layout.suit.magnifier
 }
 -- }}}
@@ -122,9 +127,32 @@ for s = 1, screen.count() do
 end
 -- }}}
 
+local function show_help()
+   local save_bg_normal = beautiful.bg_normal
+   beautiful.bg_normal = "#000000"
+   hotkeys_popup.show_help()
+   beautiful.bg_normal = save_bg_normal
+end
+
+local function layout_fn(mode) return function() awful.layout.set(mode) end end
+
 -- {{{ Menu
 -- Create a laucher widget and a main menu
 local myawesomemenu = {
+   { "Window control mode", {
+      { "Floating windows", layout_fn(awful.layout.suit.floating), beautiful.layout_floating },
+      { "Tiled", layout_fn(awful.layout.suit.tile), beautiful.layout_tile },
+      { "Tiled left", layout_fn(awful.layout.suit.tile.left), beautiful.layout_tileleft },
+      { "Tiled bottom", layout_fn(awful.layout.suit.tile.bottom), beautiful.layout_tilebottom },
+      { "Tiled top", layout_fn(awful.layout.suit.tile.top), beautiful.layout_tiletop },
+      { "Fair vertical", layout_fn(awful.layout.suit.fair), beautiful.layout_fairv },
+      { "Fair horizontal", layout_fn(awful.layout.suit.fair.horizontal), beautiful.layout_fairh },
+      { "Spiral", layout_fn(awful.layout.suit.spiral), beautiful.layout_spiral },
+      { "Dwindle", layout_fn(awful.layout.suit.spiral.dwindle), beautiful.layout_dwindle },
+      { "All windows maximized", layout_fn(awful.layout.suit.max), beautiful.layout_max },
+      { "Full screen", layout_fn(awful.layout.suit.max.fullscreen), beautiful.layout_fullscreen },
+      { "Magnifier", layout_fn(awful.layout.suit.magnifier), beautiful.layout_magnifier }}},
+   { "Hotkeys", function() return false, show_help end},
    { "Manual", terminal .. " -e pinfo awesome" },
    { "Edit Config", editor_cmd .. " " .. awesome.conffile },
    { "Restart", awesome.restart },
