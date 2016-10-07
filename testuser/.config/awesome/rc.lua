@@ -31,6 +31,9 @@ local editor = os.getenv("EDITOR") or "nano"
 local editor_cmd = terminal .. " -e " .. editor
 local browser = "firefox"
 
+local sound_widget = sound.new()
+sound_widget.terminal = terminal
+
 -- Theme handling library
 local beautiful = require("beautiful")
 beautiful.init("~/.config/awesome/themes/neon/theme.lua")
@@ -302,7 +305,7 @@ for s = 1, screen.count() do
         right_layout:add(wibox.widget.systray())
         right_layout:add(wifi.new())
         right_layout:add(battery.new())
-        right_layout:add(sound.new())
+        right_layout:add(sound_widget)
     end
     right_layout:add(mytextclock)
     --right_layout:add(mylayoutbox[s])
@@ -328,59 +331,97 @@ root.buttons(awful.util.table.join(
 
 -- {{{ Key bindings
 local globalkeys = awful.util.table.join(
-    --awful.key({ modkey,           }, "Left",   awful.tag.viewprev       ),
-    --awful.key({ modkey,           }, "Right",  awful.tag.viewnext       ),
-    awful.key({ modkey,           }, "Escape", awful.tag.history.restore),
+
+    awful.key({ modkey,           }, "s", show_help, { description = "Show hotkeys", group = "awesome" }),
+
+    awful.key({ modkey,           }, ",", awful.tag.viewprev, { description = "View previous", group = "tag" }),
+    awful.key({ modkey,           }, ".", awful.tag.viewnext, { description = "View next", group = "tag" }),
+    awful.key({ modkey,           }, "Escape", awful.tag.history.restore,
+              {description = "Go back", group = "tag"}),
 
     awful.key({ modkey,           }, "j",
         function ()
             awful.client.focus.byidx(-1)
             if client.focus then client.focus:raise() end
-        end),
+        end, { description = "Focus previous by index", group = "client" }),
     awful.key({ modkey,           }, "k",
         function ()
             awful.client.focus.byidx( 1)
             if client.focus then client.focus:raise() end
-        end),
-    awful.key({ modkey,           }, "w", function () mymainmenu:show() end),
+        end, { description = "Focus next by index", group = "client" }),
+
+    awful.key({ modkey,           }, "w", function () mymainmenu:show() end, { description = "Show main menu", group = "awesome" }),
 
     -- Layout manipulation
-    awful.key({ modkey, "Shift"   }, "j", function () awful.client.swap.byidx( -1)    end),
-    awful.key({ modkey, "Shift"   }, "k", function () awful.client.swap.byidx(  1)    end),
-    awful.key({ modkey, "Control" }, "j", function () awful.screen.focus_relative( 1) end),
-    awful.key({ modkey, "Control" }, "k", function () awful.screen.focus_relative(-1) end),
-    awful.key({ modkey,           }, "u", awful.client.urgent.jumpto),
+    -- Layout manipulation
+    awful.key({ modkey, "Shift"   }, "j", function () awful.client.swap.byidx(  1)    end,
+              {description = "Swap with next client by index", group = "client"}),
+    awful.key({ modkey, "Shift"   }, "k", function () awful.client.swap.byidx( -1)    end,
+              {description = "Swap with previous client by index", group = "client"}),
+    awful.key({ modkey, "Control" }, "j", function () awful.screen.focus_relative( 1) end,
+              {description = "Focus the next screen", group = "screen"}),
+    awful.key({ modkey, "Control" }, "k", function () awful.screen.focus_relative(-1) end,
+              {description = "Focus the previous screen", group = "screen"}),
+    awful.key({ modkey,           }, "u", awful.client.urgent.jumpto,
+              {description = "Jump to urgent client", group = "client"}),
+
     awful.key({ modkey,           }, "Tab",
         function ()
             awful.client.focus.history.previous()
             if client.focus then
                 client.focus:raise()
             end
-        end),
+        end, {description = "Go back to previous client", group = "client" }),
 
     -- Standard program
-    awful.key({ modkey,           }, "Return", function () awful.util.spawn(terminal) end),
-    awful.key({ modkey, "Control" }, "Return", function () awful.util.spawn(browser) end),
-    awful.key({                   }, "XF86HomePage", function () awful.util.spawn(browser) end),
-    awful.key({ modkey, "Control" }, "r", awesome.restart),
-    awful.key({ modkey, "Shift"   }, "q", awesome.quit),
+    awful.key({ modkey,           }, "Return", function () awful.spawn(terminal) end,
+              {description = "Open a terminal", group = "launcher"}),
+    awful.key({ modkey, "Control" }, "r", awesome.restart,
+              {description = "Reload Awesome", group = "awesome"}),
+    awful.key({ modkey, "Shift"   }, "q", awesome.quit,
+              {description = "Quit Awesome", group = "awesome"}),
 
-    awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)    end),
-    awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.05)    end),
-    awful.key({ modkey, "Shift"   }, "h",     function () awful.tag.incnmaster( 1)      end),
-    awful.key({ modkey, "Shift"   }, "l",     function () awful.tag.incnmaster(-1)      end),
-    awful.key({ modkey, "Control" }, "h",     function () awful.tag.incncol( 1)         end),
-    awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end),
-    awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
-    awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
+    awful.key({ modkey, "Shift"   }, "Return", function () awful.util.spawn(browser) end,
+              {description = "Open a browser", group = "launcher"}),
+    awful.key({ modkey,           }, "a", function() for s = 1, screen.count() do beautiful.animated_wallpaper(s) end end,
+              {description = "Regenerate GoboLinux wallpaper", group = "awesome"}),
 
-    awful.key({ modkey, "Control" }, "n", awful.client.restore),
+    awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)          end,
+              {description = "Increase master width factor", group = "layout"}),
+    awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.05)          end,
+              {description = "Decrease master width factor", group = "layout"}),
+    awful.key({ modkey, "Shift"   }, "h",     function () awful.tag.incnmaster( 1, nil, true) end,
+              {description = "Increase the number of master clients", group = "layout"}),
+    awful.key({ modkey, "Shift"   }, "l",     function () awful.tag.incnmaster(-1, nil, true) end,
+              {description = "Decrease the number of master clients", group = "layout"}),
+    awful.key({ modkey, "Control" }, "h",     function () awful.tag.incncol( 1, nil, true)    end,
+              {description = "Increase the number of columns", group = "layout"}),
+    awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1, nil, true)    end,
+              {description = "Decrease the number of columns", group = "layout"}),
+    awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts, 1) end,
+              {description = "Select next", group = "layout"}),
+    awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end,
+              {description = "Select previous", group = "layout"}),
+
+    awful.key({ modkey, "Control" }, "n",
+              function ()
+                  local c = awful.client.restore()
+                  -- Focus restored client
+                  if c then
+                      client.focus = c
+                      c:raise()
+                  end
+              end,
+              {description = "Restore minimized", group = "client"}),
 
     -- Prompt
-    awful.key({ modkey },            "r",     function () menubar.show() end),
+    awful.key({ modkey },            "r",     function () menubar.show() end,
+              {description = "Show the menubar", group = "awesome gobolinux"}),
 
-    awful.key({ ALT },            "F2",     function () menubar.show() end),
+    awful.key({ ALT },            "F2",     function () menubar.show() end,
+              {description = "Show the menubar", group = "awesome gobolinux"}),
 
+    --[[
     awful.key({ modkey }, "x",
               function ()
                   awful.prompt.run({ prompt = "Run Lua code: " },
@@ -388,19 +429,38 @@ local globalkeys = awful.util.table.join(
                   awful.util.eval, nil,
                   awful.util.getdir("cache") .. "/history_eval")
               end),
+    ]]
+    
     -- Menubar
-    awful.key({ modkey }, "p", function() menubar.show() end),
+    awful.key({ modkey }, "p", function() menubar.show() end,
+              {description = "Show the menubar", group = "launcher"}),
 
     -- Switch windows
     awful.key({ ALT,           }, "Tab",
         function ()
             alttab.switch(1, "Alt_L", "Tab", "ISO_Left_Tab")
-        end
+        end,
+        {description = "Switch between windows", group = "awesome gobolinux"}
     ),
     awful.key({ ALT, "Shift"   }, "Tab",
         function ()
             alttab.switch(-1, "Alt_L", "Tab", "ISO_Left_Tab")
-        end
+        end,
+        {description = "Switch between windows backwards", group = "awesome gobolinux"}
+    ),
+
+    -- Multimedia keys    
+    awful.key({ }, "XF86HomePage",         function () awful.util.spawn(browser) end,
+        {description = "Open a browser", group = "multimedia"}
+    ),
+    awful.key({ }, "XF86AudioRaiseVolume", function() sound_widget:set_volume(5, "+") end,
+        {description = "Raise audio volume", group = "multimedia"}
+    ),
+    awful.key({ }, "XF86AudioLowerVolume", function() sound_widget:set_volume(5, "-") end,
+        {description = "Lower audio volume", group = "multimedia"}
+    ),
+    awful.key({ }, "XF86AudioMute",        function() sound_widget:toggle_mute() end,
+        {description = "Toggle mute", group = "multimedia"}
     )
 )
 
@@ -423,8 +483,10 @@ local function window_menu(c, menu_opts)
         table.insert(entries, { "Maximize", function() c.maximized = true end, beautiful.titlebar_maximized_button_focus_inactive })
     end
     table.insert(entries, { "Minimize", function() c.minimized = true end, beautiful.titlebar_minimize_button_focus_inactive })
+    table.insert(entries, { "Always on top", function() c.ontop = not c.ontop end, c.ontop and beautiful.check_icon or nil})
+    table.insert(entries, { "Full screen", function() c.fullscreen = not c.fullscreen end, c.fullscreen and beautiful.check_icon or nil })
     table.insert(entries, { "Close", function() c:kill() end, beautiful.titlebar_close_button_focus })
-    entries.theme = { height = 24 }
+    entries.theme = { height = 24, width = 150 }
     local menu = awful.menu.new(entries)
     menu:show(menu_opts)
     window_menus[c] = menu
@@ -470,36 +532,46 @@ local function save_relative_geometry(c, geo, reference)
 end
 
 local clientkeys = awful.util.table.join(
-    awful.key({ modkey,           }, "f",      function (c) c.fullscreen = not c.fullscreen  end),
-    awful.key({ modkey, "Shift"   }, "c",      function (c) c:kill()                         end),
-    awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle                     ),
-    awful.key({ modkey, "Control" }, "Return", function (c) c:swap(awful.client.getmaster()) end),
-    awful.key({ modkey,           }, "o",      awful.client.movetoscreen                        ),
-    awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop            end),
+    awful.key({ modkey,           }, "f",      function (c) c.fullscreen = not c.fullscreen  end,
+        {description = "Toggle fullscreen", group = "client"}),
+    awful.key({ modkey, "Shift"   }, "c",      function (c) c:kill()                         end,
+              {description = "Close", group = "client"}),
+    awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle,
+              {description = "Window always floating", group = "client"}),
+    awful.key({ modkey, "Control" }, "Return", function (c) c:swap(awful.client.getmaster()) end,
+              {description = "Move to master", group = "client"}),
+    awful.key({ modkey,           }, "o",      function(c) c:move_to_screen() end,
+              {description = "Move to screen", group = "client"}),
+    awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop            end,
+              {description = "Toggle always on top", group = "client"}),
     awful.key({ modkey,           }, "n",
         function (c)
             -- The client currently has the input focus, so it cannot be
             -- minimized, since minimized clients can't have the focus.
             c.minimized = true
-        end),
+        end,
+        {description = "Minimize", group = "client"}),
     awful.key({ modkey,           }, "m",
         function (c)
             c.maximized_horizontal = not c.maximized_horizontal
             c.maximized_vertical   = not c.maximized_vertical
-        end),
-    awful.key({ ALT,           }, "F4",      function (c) kill_window_menu(c); c:kill() end),
-    awful.key({ ALT,           }, "space",   function (c) local geo = c:geometry(); window_menu(c, { coords = { x = geo.x, y = geo.y } } ) end),
+        end,
+        {description = "Maximize", group = "client"}),
+    awful.key({ ALT,           }, "F4",      function (c) kill_window_menu(c); c:kill() end,
+              {description = "Close", group = "client"}),
+    awful.key({ ALT,           }, "space",   function (c) local geo = c:geometry(); window_menu(c, { coords = { x = geo.x, y = geo.y } } ) end,
+        {description = "Open window menu", group = "client"}),
 
 
-    awful.key({ modkey, ALT,   }, "Up",    move_key("vertical", delta)),
-    awful.key({ modkey, ALT,   }, "Down",  move_key("vertical", -delta)),
-    awful.key({ modkey, ALT,   }, "Left",  move_key("horizontal", delta)),
-    awful.key({ modkey, ALT,   }, "Right", move_key("horizontal", -delta)),
+    awful.key({ modkey, ALT,   }, "Up",    move_key("vertical", delta),    { description = "Move floating window", group = "awesome gobolinux" }),
+    awful.key({ modkey, ALT,   }, "Down",  move_key("vertical", -delta),   { description = "Move floating window", group = "awesome gobolinux" }),
+    awful.key({ modkey, ALT,   }, "Left",  move_key("horizontal", delta),  { description = "Move floating window", group = "awesome gobolinux" }),
+    awful.key({ modkey, ALT,   }, "Right", move_key("horizontal", -delta), { description = "Move floating window", group = "awesome gobolinux" }),
 
-    awful.key({ modkey, "Control", ALT }, "Up",    function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ height = curr.height - delta }); end; end),
-    awful.key({ modkey, "Control", ALT }, "Down",  function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ height = curr.height + delta }); end; end),
-    awful.key({ modkey, "Control", ALT }, "Left",  function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ width  = curr.width  - delta }); end; end),
-    awful.key({ modkey, "Control", ALT }, "Right", function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ width  = curr.width  + delta }); end; end),
+    awful.key({ modkey, "Shift", ALT }, "Up",    function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ height = curr.height - delta }); end; end, { description = "Resize floating window", group = "awesome gobolinux" }),
+    awful.key({ modkey, "Shift", ALT }, "Down",  function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ height = curr.height + delta }); end; end, { description = "Resize floating window", group = "awesome gobolinux" }),
+    awful.key({ modkey, "Shift", ALT }, "Left",  function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ width  = curr.width  - delta }); end; end, { description = "Resize floating window", group = "awesome gobolinux" }),
+    awful.key({ modkey, "Shift", ALT }, "Right", function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ width  = curr.width  + delta }); end; end, { description = "Resize floating window", group = "awesome gobolinux" }),
 
     awful.key({ modkey,        }, "Left",   function (c)
                                                 local curr = c:geometry()
@@ -532,7 +604,7 @@ local clientkeys = awful.util.table.join(
                                                           })
                                                 save_relative_geometry(c, curr, s_area)
                                                 auto_tile[c].mode = mode
-                                             end),
+                                             end, { description = "Dock / move docked window", group = "awesome gobolinux" }),
     awful.key({ modkey,        }, "Right",   function (c)
                                                 local area = screen[c.screen].workarea
                                                 local s_area = area
@@ -564,7 +636,7 @@ local clientkeys = awful.util.table.join(
                                                           })
                                                 save_relative_geometry(c, curr, s_area)
                                                 auto_tile[c].mode = mode
-                                             end),
+                                             end, { description = "Dock / move docked window", group = "awesome gobolinux" }),
     awful.key({ modkey,        }, "Up",   function (c)
                                                 local area = screen[c.screen].workarea
                                                 local half = math.floor(area.height / 2)
@@ -587,7 +659,7 @@ local clientkeys = awful.util.table.join(
                                                 end
                                                 save_relative_geometry(c, curr, area)
                                                 auto_tile[c].mode = "up"
-                                             end),
+                                             end, { description = "Dock / move docked window", group = "awesome gobolinux" }),
     awful.key({ modkey,        }, "Down",   function (c)
                                                 c.maximized = false
                                                 local area = screen[c.screen].workarea
@@ -618,7 +690,7 @@ local clientkeys = awful.util.table.join(
                                                     awful.placement.no_offscreen(c)
                                                     auto_tile[c] = nil
                                                 end
-                                             end)
+                                             end, { description = "Dock / move docked window", group = "awesome gobolinux" })
 )
 
 -- Bind all key numbers to tags.
@@ -634,7 +706,8 @@ for i = 1, 4 do
                         if tag then
                            awful.tag.viewonly(tag)
                         end
-                  end),
+                  end,
+                  {description = "View tag #"..i, group = "tag"}),
         -- Toggle tag.
         awful.key({ modkey, "Control" }, "#" .. i + 9,
                   function ()
@@ -643,7 +716,8 @@ for i = 1, 4 do
                       if tag then
                          awful.tag.viewtoggle(tag)
                       end
-                  end),
+                  end,
+                  {description = "Toggle tag #" .. i, group = "tag"}),
         -- Move client to tag.
         awful.key({ modkey, "Shift" }, "#" .. i + 9,
                   function ()
@@ -653,7 +727,8 @@ for i = 1, 4 do
                               awful.client.movetotag(tag)
                           end
                      end
-                  end),
+                  end,
+                  {description = "Move focused client to tag #"..i, group = "tag"}),
         -- Toggle tag.
         awful.key({ modkey, "Control", "Shift" }, "#" .. i + 9,
                   function ()
@@ -663,7 +738,8 @@ for i = 1, 4 do
                               awful.client.toggletag(tag)
                           end
                       end
-                  end))
+                  end,
+                  {description = "Toggle focused client on tag #" .. i, group = "tag"}))
 end
 
 local function custom_move(c)
@@ -715,6 +791,8 @@ awful.rules.rules = {
       properties = { floating = true } },
     { rule = { class = "Audacious" },
       properties = { floating = true, border_width = 0 } },
+    { rule = { name = "alsamixer" },
+      properties = { floating = true, border_width = 0 } },
     -- Set Firefox to always map on tags number 2 of screen 1.
     -- { rule = { class = "Firefox" },
     --   properties = { tag = tags[1][2] } },
@@ -733,6 +811,7 @@ end
 local no_titlebars = {
     ["plugin-container"] = true,
     ["Audacious"] = true,
+    ["alsamixer"] = true,
 }
 
 -- {{{ Signals

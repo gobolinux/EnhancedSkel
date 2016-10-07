@@ -11,6 +11,148 @@ local theme = {}
 
 math.randomseed(os.time())
 
+local naughty = require("naughty")
+
+-- {{{ Wallpaper
+--theme.wallpaper = "~/.config/awesome/themes/neon/wallpaper.png"
+--theme.wallpaper = "/Data/Wallpapers/TongariroColors.jpg"
+local anim_reset = 0
+theme.animated_wallpaper = function()
+   
+   anim_reset = anim_reset + 1
+
+   for s = 1, screen.count() do
+      
+      local cairo = require("lgi").cairo
+      local gears = require("gears")
+      local wallpaper = require("gears.wallpaper")
+      local timer = gears.timer or timer
+      
+      local width = screen[s].geometry.width
+      local height = screen[s].geometry.height
+   
+      local layers = {}
+   
+      local nt = 10
+      for a = 1, nt do
+         local layer = {}
+         layer.rx = math.random(0, width)
+         layer.ry = math.random(0, height)
+   
+         layer.ax = math.random(0, width)
+         layer.ay = math.random(0, height)
+   
+         layer.bx = math.random(-width / 2, width * 1.5)
+         layer.by = math.random(-height / 2, height * 1.5)
+         
+         layer.ax, layer.bx = math.min(layer.ax, layer.bx), math.max(layer.ax, layer.bx)
+         layer.ay, layer.by = math.min(layer.ay, layer.by), math.max(layer.ay, layer.by)
+
+         layer.mx = math.min(layer.rx, layer.ax)
+         layer.my = math.min(layer.ry, layer.ay)
+         layer.Mx = math.max(layer.rx, layer.bx)
+         layer.My = math.max(layer.ry, layer.by)
+         
+         layer.rx = layer.rx - layer.mx
+         layer.ry = layer.ry - layer.my
+         layer.ax = layer.ax - layer.mx
+         layer.ay = layer.ay - layer.my
+         layer.bx = layer.bx - layer.mx
+         layer.by = layer.by - layer.my
+
+         layer.surf = cairo.ImageSurface("RGB32", layer.Mx - layer.mx + 1, layer.My - layer.my + 1)
+         layer.cr = cairo.Context(layer.surf)
+         layer.cr:set_line_width(width / 720)
+         --layer.cr:set_source_rgb(a/nt, a/nt, a/nt)
+         --layer.cr:paint()
+         layers[a] = layer
+      end
+          
+      local zcr = cairo.Context(layers[1].surf)
+      zcr:set_source_rgb(0, 0, 0)
+   
+      local scanlines = cairo.ImageSurface("RGB32", width, height)
+      local scr = cairo.Context(scanlines)
+      scr:set_line_width(width / 720)
+      scr:set_source_rgb(0, 0, 0)
+      for i = 1, 256 do
+         scr:move_to(0, height / 256 * i)
+         scr:line_to(width, height / 256 * i)
+      end
+      scr:stroke()
+      
+      local anim = timer({timeout=0})
+      local i = 1
+      local ln = 75
+   
+      local anim_id = anim_reset
+   
+      anim:connect_signal("timeout", function()
+
+         local geom, wcr = wallpaper.prepare_context(screen[s])
+   
+         for _ = 1, 2 do
+            for a = 1, nt do
+               local l = layers[a]
+               local cr = l.cr
+               
+               local fac = a / nt
+      
+               local pc = i/ln
+               cr:set_source_rgb((i - 25) / ln * fac, (ln - i) / ln * fac, (i + 50) / ln * fac)
+               cr:move_to(l.rx, l.ry)
+               local dx, dy
+               if a % 2 == 0 then
+                  dx = l.ax + (l.bx - l.ax) * pc
+                  dy = l.ay + (l.by - l.ay) * pc
+               else
+                  dx = l.bx - (l.bx - l.ax) * pc
+                  dy = l.by - (l.by - l.ay) * pc
+               end
+               cr:line_to(dx, dy)
+               cr:stroke()
+            end
+            i = i + 1
+            if i > ln then
+               break
+            end
+         end
+   
+         wcr:set_source_rgb(0,0,0)
+         wcr.operator = cairo.Operator.SOURCE
+         wcr:paint()
+         wcr.operator = cairo.Operator.OVER
+         for a = 1, nt do
+            local l = layers[a]
+            wcr:set_source_surface(l.surf, l.mx, l.my)
+            wcr:paint()
+            --[[
+            wcr:set_source_rgb(1, 0, 0)
+            wcr:arc(l.rx + l.mx, l.ry + l.my, 5, 0, math.rad(360))
+            wcr:arc(l.ax + l.mx, l.ay + l.my, 5, 0, math.rad(360))
+            wcr:arc(l.bx + l.mx, l.by + l.my, 5, 0, math.rad(360))
+            wcr:stroke()
+            ]]
+         end 
+         wcr:set_source_surface(scanlines, 0, 0)
+         wcr:paint()
+   
+         if i > ln or anim_id ~= anim_reset then
+            for a = 1, nt do
+               layers[a].surf:finish()
+            end
+            scanlines:finish()
+            anim:stop()
+         end
+         
+      end)
+      anim:start()
+   end
+
+   --img:finish()
+end
+-- }}}
+
 -- {{{ Wallpaper
 --theme.wallpaper = "~/.config/awesome/themes/neon/wallpaper.png"
 --theme.wallpaper = "/Data/Wallpapers/TongariroColors.jpg"
@@ -22,8 +164,8 @@ theme.wallpaper = function(s)
    end
    local cairo = require("lgi").cairo
    local gears = require("gears")
-   local height = s.workarea.height
-   local width = s.workarea.width
+   local height = s.geometry.height
+   local width = s.geometry.width
    local img = cairo.RecordingSurface(cairo.Content.COLOR, cairo.Rectangle { x = 0, y = 0, width = width, height = height })
    local cr = cairo.Context(img)
    
@@ -49,37 +191,29 @@ theme.wallpaper = function(s)
       for i = 1, ln do
          local pc = i/ln
          cr:set_source_rgb((i - 25) / ln * fac, (ln - i) / ln * fac, (i + 50) / ln * fac)
-         --[[
-         cr:rectangle(
-            10 * i, 10 * i,
-            10 * i + 9, 10 * i + 9
-         )
-         ]]
-         cr:stroke()
-         --cr:fill()
-   
          cr:move_to(rx, ry)
          cr:line_to(ax + (ax - bx) * pc, ay + (ay - by) * pc)
          cr:stroke()
       end   
-   
+      
    end
 
    cr:set_source_rgb(0, 0, 0)
    for i = 1, 256 do
       cr:move_to(0, height / 256 * i)
       cr:line_to(width, height / 256 * i)
-      cr:stroke()
    end
+   cr:stroke()
 
    return img
-
---   return "~/.config/awesome/themes/neon/wallpaper.png"
 end
 -- }}}
 
 -- {{{ Styles
 theme.font          = "Lode Sans 10"
+naughty.config.defaults.font = "sans 10"
+naughty.config.presets.critical.bg = { type = "linear", from = {0,0}, to = {0,35}, stops = { {0, "#FF0000"}, {1, "#770000"} } }
+naughty.config.defaults.fg = "#97b9b9"
 
 -- {{{ Colors
 local topbar_gradient = { type = "linear", from = {0,0}, to = {0,15}, stops = { {0, "#1F373F"}, {1, "#0F171F"} } }
@@ -140,7 +274,7 @@ theme.mouse_finder_color = "#CC9393"
 -- menu_[bg|fg]_[normal|focus]
 -- menu_[border_color|border_width]
 theme.menu_fg_normal = "#779999"
-theme.menu_bg_normal = "#2F3F3F70"
+theme.menu_bg_normal = "#2F3F3F90"
 theme.menu_height = 15
 theme.menu_width  = 100
 -- }}}
@@ -226,6 +360,9 @@ theme.wifi_1_icon           = "~/.config/awesome/themes/neon/wifi_1.png"
 theme.wifi_0_icon           = "~/.config/awesome/themes/neon/wifi_0.png"
 theme.wifi_down_icon         = "~/.config/awesome/themes/neon/wifi_down.png"
 
+theme.check_icon       = "~/.config/awesome/themes/neon/check.png"
+
 -- }}}
 
+theme[1] = theme
 return theme

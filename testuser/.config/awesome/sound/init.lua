@@ -3,6 +3,7 @@ local sound = {}
 
 local icon_theme = require("menubar.icon_theme")
 local awful = require("awful")
+local beautiful = require("beautiful")
 local wibox = require("wibox")
 local gears = require("gears")
 local timer = gears.timer or timer
@@ -32,22 +33,6 @@ local function update_state(state, output)
    state.valid = true
    state.volume = tonumber(volume)
    state.mute = (mute == "off")
-end
-
-local function set_volume(state, config, val, delta)
-   local setting = val.."%"..delta
-   update_state(state, pread("amixer -M -c "..config.card.." -- set '"..config.channel.."' playback "..setting))
-end
-
-local function set_volume(state, config, val, delta)
-   local setting = val.."%"..delta
-   update_state(state, pread("amixer -M -c "..config.card.." -- set '"..config.channel.."' playback "..setting))
-end
-
-
-local function toggle_mute(state, config)
-   local setting = state.mute and "on" or "off"
-   update_state(state, pread("amixer -M -c "..config.card.." -- set '"..config.channel.."' mute "..setting))
 end
 
 local function update(state, config)
@@ -161,6 +146,19 @@ function sound.new(card, channel)
       volume = 0,
       mute = false
    }
+
+   widget.set_volume = function (self, val, delta)
+      local setting = val.."%"..delta
+      update_state(state, pread("amixer -M -c "..config.card.." -- set '"..config.channel.."' playback "..setting))
+      update_icon(self, state)
+   end
+   
+   widget.toggle_mute = function(self)
+      local setting = state.mute and "on" or "off"
+      update_state(state, pread("amixer -M -c "..config.card.." -- set '"..config.channel.."' mute "..setting))
+      update_icon(self, state)
+   end
+
    local widget_timer = timer({timeout=5})
    widget_timer:connect_signal("timeout", function()
       update(state, config)
@@ -169,20 +167,36 @@ function sound.new(card, channel)
    widget_timer:start()
    widget:buttons(awful.util.table.join(
       awful.button({ }, 1, function()
-         toggle_mute(state, config)
-         update_icon(widget, state)
+         widget:toggle_mute()
+      end),
+      awful.button({ }, 3, function()
+         local x = mouse.screen.geometry.width - 800
+         local y = 24
+         local killed = false
+         for c in awful.client.iterate(function (c) return c.name == "alsamixer" end, nil, mouse.screen) do
+            c:kill()
+            killed = true
+         end
+         if not killed then
+            awful.util.spawn("urxvt -geometry 100x20+"..x.."+"..y.." -cr green -fn '*-lode sans mono-*' -fb '*-lode sans mono-*' -fi '*-lode sans mono-*' -fbi '*-lode sans mono-*' -depth 32 --color0 rgba:2F00/3F00/3F00/e000 --color4 '#2F3F3F' --color6 '#8aa' --color11 '#2ee' --color14 '#acc' --color15 '#ddd' -b 0 +sb -e alsamixer") -- or whatever your preferred sound mixer is
+            local t = timer.start_new(0.3, function()
+               for c in awful.client.iterate(function (c) return c.name == "alsamixer" end, nil, mouse.screen) do
+                  c:connect_signal("unfocus", function(c) c:kill() end)
+               end
+               t:stop()
+            end)
+         end
       end),
       awful.button({ }, 4, function()
-         set_volume(state, config, 5, "-")
-         update_icon(widget, state)
+         widget:set_volume(5, "-")
       end),
       awful.button({ }, 5, function()
-         set_volume(state, config, 5, "+")
-         update_icon(widget, state)
+         widget:set_volume(5, "+")
       end)
    ))
    update(state, config)
    update_icon(widget, state)
+   widget:connect_signal("mouse::enter", function() update(state, config) end)
    return widget
 end
 
