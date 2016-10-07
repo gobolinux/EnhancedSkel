@@ -363,7 +363,7 @@ function alttab.switch(dir, alt, tab, shift_tab)
       -- if not already there.
       -- This will preserve the history AND enable you to focus on minimized clients
    
-      local t = awful.tag.selected(s)
+      local t = screen[s].selected_tag
       local all = client.get(s)
    
       for i = 1, #all do
