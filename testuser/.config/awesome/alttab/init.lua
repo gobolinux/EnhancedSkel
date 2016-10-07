@@ -3,11 +3,10 @@ local mouse = mouse
 local screen = screen
 local wibox = require('wibox')
 local table = table
-local timer = timer
+local gears = require("gears")
 local keygrabber = keygrabber
 local math = require('math')
 local awful = require('awful')
-local gears = require("gears")
 local client = client
 awful.client = require('awful.client')
 local naughty = require("naughty")
@@ -36,6 +35,25 @@ alttab.settings = {
    client_opacity_delay = 150,
 }
 local settings = alttab.settings
+
+-- A wrapper that ignores :stop() calls in already-stopped timers.
+local function timer(args)
+   local t = gears.timer(args)
+   local started = false
+   return {
+      start = function()
+         started = true
+         return t:start()
+      end,
+      stop = function()
+         if not started then return end 
+         return t:stop()
+      end,
+      connect_signal = function(_, s, f)
+         return t:connect_signal(s, f)
+      end
+   }
+end
 
 -- Full history of all clients:
 local history
