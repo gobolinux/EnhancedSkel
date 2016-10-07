@@ -106,14 +106,41 @@ local function draw_icon(surface, state)
    end
 end
 
+local function notify_battery_level(state, image, timeout)
+   if not image then
+      image = cairo.ImageSurface("ARGB32", 100, 100)
+      draw_icon(image, state)
+   end
+   local mode
+   if state.mode == "Charging"
+   then
+      mode = "<b>Charging</b><br/>"
+   elseif state.percent <= 15 then
+      mode = "<b>Warning</b><br/>"
+   else
+      mode = ""
+   end
+   local text = mode .. "Battery level at <b>"..state.percent.."%</b>"
+   local icon = cairo.ImageSurface("ARGB32", 70, 100)
+   local cr = cairo.Context(icon)
+   cr:set_source_surface(image, -15, 0)
+   cr:paint()
+   naughty.notify { icon = icon, text = text, timeout = timeout or 2 }
+end
+
 local function update_icon(widget, state)
    local image = cairo.ImageSurface("ARGB32", 100, 100)
    draw_icon(image, state)
    widget:set_image(image)
+   if state.alert then
+      notify_battery_level(state, image, 5)
+      state.alert = false
+   end
 end
 
 local function update(state)
    local basedir = "/sys/class/power_supply"
+   local old_percent = state.percent
    for dir in lfs.dir(basedir) do
       local fd = io.open(basedir.."/"..dir.."/capacity", "r")
       if fd then
@@ -130,21 +157,51 @@ local function update(state)
          break
       end
    end
+   if state.mode ~= "Charging" and 
+      ((old_percent > 15 and state.percent <= 15) or
+       (old_percent > 10 and state.percent <= 10) or
+       (old_percent > 5 and state.percent <= 5) or
+       (old_percent > 1 and state.percent <= 1))
+   then
+      state.alert = true
+   end
 end
 
 function battery.new()
    local widget = wibox.widget.imagebox()
    local state = {
-      percent = 0
+      percent = 100
    }
+   update(state)
+   if not state.mode then
+      -- Return empty widget. No battery detected.
+      return widget
+   end
+   update_icon(widget, state)
+
    local widget_timer = timer({timeout=5})
    widget_timer:connect_signal("timeout", function()
       update(state)
       update_icon(widget, state)
    end)
    widget_timer:start()
-   update(state)
-   update_icon(widget, state)
+
+   local last_notification = 0
+   local notify_status = function()
+      local now = os.time()
+      if last_notification < now - 2 then
+         notify_battery_level(state)
+         last_notification = now
+      end
+   end
+
+   widget:buttons(
+      awful.util.table.join(
+         awful.button({ }, 1, notify_status),
+         awful.button({ }, 3, notify_status)
+      )
+   )
+
    return widget
 end
 
