@@ -2,6 +2,7 @@
 local battery = {}
 
 local wibox = require("wibox")
+local awful = require("awful")
 local gears = require("gears")
 local naughty = require("naughty")
 local lfs = require("lfs")
@@ -81,14 +82,14 @@ local function draw_icon(surface, state)
    local height = 80 * (state.percent / 100)
 
    if state.percent < 15 then
-      glow_rectangle(cr, 25, 90 - height, 50, height, 1, 0, 0, 0.4, 12)
+      glow_rectangle(cr, 25, 90 - height, 50, height, 1, 0, 0, 0.4, 8)
    else
       if height > 70 then
          local topheight = height - 70
-         glow_rectangle(cr, 35, 20 - topheight, 30, topheight, 0, 1, 0.75, 0.3, 12)
+         glow_rectangle(cr, 35, 20 - topheight, 30, topheight, 0, 1, 0.75, 0.3, 8)
          height = 70
       end
-      glow_rectangle(cr, 25, 90 - height, 50, height, 0, 1, 0.75, 0.3, 12)
+      glow_rectangle(cr, 25, 90 - height, 50, height, 0, 1, 0.75, 0.3, 8)
    end
    
    if state.mode == "Charging" then
