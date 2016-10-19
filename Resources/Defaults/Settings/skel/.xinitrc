@@ -1,5 +1,8 @@
 xsetroot -solid '#000000' -cursor_name 'left_ptr'
 
+# Load user preferences
+[ -e ~/.Xresources ] && xrdb -merge ~/.Xresources
+
 # Workaround for broken input device detection
 [ -e /bin/udevadm ] && udevadm trigger
 # Update the MIME database
