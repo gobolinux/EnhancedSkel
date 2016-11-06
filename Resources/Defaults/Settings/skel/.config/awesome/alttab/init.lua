@@ -9,10 +9,7 @@ local math = require('math')
 local awful = require('awful')
 local client = client
 awful.client = require('awful.client')
-local naughty = require("naughty")
 
-local string = string
-local debug = debug
 local pairs = pairs
 
 local alttab = {}
@@ -183,14 +180,14 @@ local function preview()
    for i = 1, #leftRightTab do
       preview_widgets[i] = wibox.widget.base.make_widget()
       preview_widgets[i].fit = function(preview_widget, width, height)
-            return w, h
+         return w, h
       end
       
       preview_widgets[i].draw = function(preview_widget, preview_wbox, cr, width, height)
-            if width ~= 0 and height ~= 0 then
+         if width ~= 0 and height ~= 0 then
 
-               local c = leftRightTab[i]
-            local a = 0.8
+            local c = leftRightTab[i]
+            local a = 0.7
             local overlay = 0.6
             local fontSize = smallFont
             if c == altTabTable[altTabIndex] then
@@ -199,7 +196,7 @@ local function preview()
                fontSize = bigFont
             end
 
-               local sx, sy, tx, ty
+            local sx, sy, tx, ty
 
             -- Icons
             local icon
@@ -274,7 +271,7 @@ local function preview()
             cr:set_source_rgba(0,0,0,overlay)
             cr:rectangle(tx, ty, sx * cg.width, sy * cg.height)
             cr:fill()
-            end
+         end
       end
 
       preview_live_timer.timeout = 1 / settings.preview_box_fps
@@ -478,13 +475,14 @@ function alttab.switch(dir, alt, tab, shift_tab)
 
             keygrabber.stop()
 
-                  -- Move to next client on each Tab-press
+         -- Move to previous client on Shift-Tab
+         elseif (key == shift_tab or (mod[1] == "Shift" and key == "Tab") or key == "Left") and event == "press" then
+            altTabIndex = cycle(altTabTable, altTabIndex, -1)
+
+         -- Move to next client on each Tab-press
          elseif (key == tab or key == "Right") and event == "press" then
             altTabIndex = cycle(altTabTable, altTabIndex, 1)
             
-                  -- Move to previous client on Shift-Tab
-         elseif (key == shift_tab or key == "Left") and event == "press" then
-            altTabIndex = cycle(altTabTable, altTabIndex, -1)
          end
       end
    )
