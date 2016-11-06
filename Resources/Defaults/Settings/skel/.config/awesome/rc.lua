@@ -478,7 +478,7 @@ local function window_menu(c, menu_opts)
     kill_window_menu(c)
     local entries = {}
     if c.maximized then
-        table.insert(entries, { "Restore", function() c.maximized = false end, beautiful.titlebar_maximized_button_focus_active })
+        table.insert(entries, { "Restore", function() c.maximized_vertical = false; c.maximized_horizontal = false; end, beautiful.titlebar_maximized_button_focus_active })
     else
         table.insert(entries, { "Maximize", function() c.maximized = true end, beautiful.titlebar_maximized_button_focus_inactive })
     end
@@ -496,6 +496,11 @@ local auto_tile = {}
 setmetatable(auto_tile, { __mode = "k" })
 
 local delta = 64
+
+local function undock_auto_tile(c)
+    c.border_width = beautiful.border_width
+    auto_tile[c] = nil
+end
 
 local function move_key(orient, delta)
     local size, pos, upleft, downright
@@ -531,6 +536,147 @@ local function save_relative_geometry(c, geo, reference)
     end
 end
 
+local function corner(bottom, right, mods, key)
+    local fn = function (c)
+        local area = screen[c.screen].workarea
+        undock_auto_tile(c)
+        c.maximized = false
+        c:geometry({
+            x = area.x + (right == "right" and (area.width / 2) or 0),
+            y = area.y + (bottom == "bottom" and (area.height / 2) or 0),
+            width = (area.width / 2) - (c.border_width * 2),
+            height = (area.height / 2) - (c.border_width * 2),
+        })
+    end
+    return awful.key(mods, key, fn, { description = "Arrange at "..bottom.."-"..right.." corner", group = "awesome gobolinux" })
+end
+
+local function dock_left(c)
+    local curr = c:geometry()
+    local area = screen[c.screen].workarea
+    local s_area = area
+    local half = math.floor(area.width / 2)
+    local offset = 0
+    local mode = "left"
+    local maxd = c.maximized
+    if (maxd or (curr.x == area.x and curr.y == area.y)) and area.x > 0 then
+        local nextscreen = awful.screen.getbycoord(area.x - 1, area.y)
+        area = screen[nextscreen].workarea
+        if maxd then
+            half = area.width
+            offset = 0
+            mode = "up"
+            c.screen = nextscreen
+        else
+            half = math.floor(area.width / 2)
+            offset = half
+            mode = "right"
+        end
+    else
+        c.maximized = false
+    end
+    c:geometry({ x = area.x + offset,
+                 y = area.y,
+                 width = half,
+                 height = area.height
+              })
+    save_relative_geometry(c, curr, s_area)
+    auto_tile[c].mode = mode
+    c.border_width = 0
+end
+
+local function dock_right(c)
+    local area = screen[c.screen].workarea
+    local s_area = area
+    local half = math.floor(area.width / 2)
+    local curr = c:geometry()
+    local offset = 0
+    local mode = "right"
+    local nextscreen = awful.screen.getbycoord(area.x + area.width, area.y, -1)
+    local maxd = c.maximized
+    if (maxd or (curr.x == area.x + half and curr.y == area.y)) and nextscreen ~= -1 then
+        area = screen[nextscreen].workarea
+        if maxd then
+            half = area.width
+            offset = area.width
+            mode = "up"
+            c.screen = nextscreen
+        else
+            half = math.floor(area.width / 2)
+            offset = half
+            mode = "left"
+        end
+    else
+        c.maximized = false
+    end
+    c:geometry({ x = area.x + half - offset,
+                 y = area.y,
+                 width = half,
+                 height = area.height
+              })
+    save_relative_geometry(c, curr, s_area)
+    auto_tile[c].mode = mode
+    c.border_width = 0
+end
+
+local function dock_up(c)
+    local area = screen[c.screen].workarea
+    local half = math.floor(area.height / 2)
+    local curr = c:geometry()
+    local tophalf = (curr.x == area.x and curr.y == area.y and math.abs(curr.height - half) < 20)
+    if c.maximized or (not tophalf) then
+        c.maximized = false
+        c:geometry({ x = area.x,
+                     y = area.y,
+                     width = area.width,
+                     height = half,
+                  })
+    elseif tophalf then
+        c.maximized = true
+        c:geometry({ x = area.x,
+                     y = area.y,
+                     width = area.width,
+                     height = area.height,
+                  })
+    end
+    save_relative_geometry(c, curr, area)
+    auto_tile[c].mode = "up"
+    c.border_width = 0
+end
+
+local function dock_down(c)
+    c.maximized = false
+    local area = screen[c.screen].workarea
+    local half = math.floor(area.height / 2)
+    local curr = c:geometry()
+    if curr.y ~= area.y + half then
+        c:geometry({ x = area.x,
+                     y = area.y + half,
+                     width = area.width,
+                     height = half,
+                  })
+        save_relative_geometry(c, curr, area)
+        auto_tile[c].mode = "down"
+        c.border_width = 0
+    elseif auto_tile[c] then
+        local old = auto_tile[c].old
+        if old.x == 0 and old.y == 0 then
+            old = {
+                x = area.x + (area.width / 4),
+                y = area.y + (area.height / 4),
+                width = area.width / 2,
+                height = area.height / 2,
+            }
+        else
+            old.x = old.x + area.x
+            old.y = old.y + area.y
+        end
+        c:geometry(old)
+        awful.placement.no_offscreen(c)
+        undock_auto_tile(c)
+    end
+end
+
 local clientkeys = awful.util.table.join(
     awful.key({ modkey,           }, "f",      function (c) c.fullscreen = not c.fullscreen  end,
         {description = "Toggle fullscreen", group = "client"}),
@@ -562,135 +708,30 @@ local clientkeys = awful.util.table.join(
     awful.key({ ALT,           }, "space",   function (c) local geo = c:geometry(); window_menu(c, { coords = { x = geo.x, y = geo.y } } ) end,
         {description = "Open window menu", group = "client"}),
 
-
     awful.key({ modkey, ALT,   }, "Up",    move_key("vertical", delta),    { description = "Move floating window", group = "awesome gobolinux" }),
     awful.key({ modkey, ALT,   }, "Down",  move_key("vertical", -delta),   { description = "Move floating window", group = "awesome gobolinux" }),
     awful.key({ modkey, ALT,   }, "Left",  move_key("horizontal", delta),  { description = "Move floating window", group = "awesome gobolinux" }),
     awful.key({ modkey, ALT,   }, "Right", move_key("horizontal", -delta), { description = "Move floating window", group = "awesome gobolinux" }),
 
-    awful.key({ modkey, "Shift", ALT }, "Up",    function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ height = curr.height - delta }); end; end, { description = "Resize floating window", group = "awesome gobolinux" }),
-    awful.key({ modkey, "Shift", ALT }, "Down",  function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ height = curr.height + delta }); end; end, { description = "Resize floating window", group = "awesome gobolinux" }),
-    awful.key({ modkey, "Shift", ALT }, "Left",  function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ width  = curr.width  - delta }); end; end, { description = "Resize floating window", group = "awesome gobolinux" }),
-    awful.key({ modkey, "Shift", ALT }, "Right", function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ width  = curr.width  + delta }); end; end, { description = "Resize floating window", group = "awesome gobolinux" }),
+    awful.key({ modkey, "Ctrl", ALT }, "Up",    function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ height = curr.height - delta }); end; end, { description = "Resize floating window", group = "awesome gobolinux" }),
+    awful.key({ modkey, "Ctrl", ALT }, "Down",  function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ height = curr.height + delta }); end; end, { description = "Resize floating window", group = "awesome gobolinux" }),
+    awful.key({ modkey, "Ctrl", ALT }, "Left",  function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ width  = curr.width  - delta }); end; end, { description = "Resize floating window", group = "awesome gobolinux" }),
+    awful.key({ modkey, "Ctrl", ALT }, "Right", function (c) local curr = c:geometry(); if not auto_tile[c] then c:geometry({ width  = curr.width  + delta }); end; end, { description = "Resize floating window", group = "awesome gobolinux" }),
 
-    awful.key({ modkey,        }, "Left",   function (c)
-                                                local curr = c:geometry()
-                                                local area = screen[c.screen].workarea
-                                                local s_area = area
-                                                local half = math.floor(area.width / 2)
-                                                local offset = 0
-                                                local mode = "left"
-                                                local maxd = c.maximized
-                                                if (maxd or (curr.x == area.x and curr.y == area.y)) and area.x > 0 then
-                                                    local nextscreen = awful.screen.getbycoord(area.x - 1, area.y)
-                                                    area = screen[nextscreen].workarea
-                                                    if maxd then
-                                                        half = area.width
-                                                        offset = 0
-                                                        mode = "up"
-                                                        c.screen = nextscreen
-                                                    else
-                                                        half = math.floor(area.width / 2)
-                                                        offset = half
-                                                        mode = "right"
-                                                    end
-                                                else
-                                                    c.maximized = false
-                                                end
-                                                c:geometry({ x = area.x + offset,
-                                                             y = area.y,
-                                                             width = half,
-                                                             height = area.height
-                                                          })
-                                                save_relative_geometry(c, curr, s_area)
-                                                auto_tile[c].mode = mode
-                                             end, { description = "Dock / move docked window", group = "awesome gobolinux" }),
-    awful.key({ modkey,        }, "Right",   function (c)
-                                                local area = screen[c.screen].workarea
-                                                local s_area = area
-                                                local half = math.floor(area.width / 2)
-                                                local curr = c:geometry()
-                                                local offset = 0
-                                                local mode = "right"
-                                                local nextscreen = awful.screen.getbycoord(area.x + area.width, area.y, -1)
-                                                local maxd = c.maximized
-                                                if (maxd or (curr.x == area.x + half and curr.y == area.y)) and nextscreen ~= -1 then
-                                                    area = screen[nextscreen].workarea
-                                                    if maxd then
-                                                        half = area.width
-                                                        offset = area.width
-                                                        mode = "up"
-                                                        c.screen = nextscreen
-                                                    else
-                                                        half = math.floor(area.width / 2)
-                                                        offset = half
-                                                        mode = "left"
-                                                    end
-                                                else
-                                                    c.maximized = false
-                                                end
-                                                c:geometry({ x = area.x + half - offset,
-                                                             y = area.y,
-                                                             width = half,
-                                                             height = area.height
-                                                          })
-                                                save_relative_geometry(c, curr, s_area)
-                                                auto_tile[c].mode = mode
-                                             end, { description = "Dock / move docked window", group = "awesome gobolinux" }),
-    awful.key({ modkey,        }, "Up",   function (c)
-                                                local area = screen[c.screen].workarea
-                                                local half = math.floor(area.height / 2)
-                                                local curr = c:geometry()
-                                                local tophalf = (curr.x == area.x and curr.y == area.y and math.abs(curr.height - half) < 20)
-                                                if c.maximized or (not tophalf) then
-                                                    c.maximized = false
-                                                    c:geometry({ x = area.x,
-                                                                 y = area.y,
-                                                                 width = area.width,
-                                                                 height = half,
-                                                              })
-                                                elseif tophalf then
-                                                    c.maximized = true
-                                                    c:geometry({ x = area.x,
-                                                                 y = area.y,
-                                                                 width = area.width,
-                                                                 height = area.height,
-                                                              })
-                                                end
-                                                save_relative_geometry(c, curr, area)
-                                                auto_tile[c].mode = "up"
-                                             end, { description = "Dock / move docked window", group = "awesome gobolinux" }),
-    awful.key({ modkey,        }, "Down",   function (c)
-                                                c.maximized = false
-                                                local area = screen[c.screen].workarea
-                                                local half = math.floor(area.height / 2)
-                                                local curr = c:geometry()
-                                                if curr.y ~= area.y + half then
-                                                    c:geometry({ x = area.x,
-                                                                 y = area.y + half,
-                                                                 width = area.width,
-                                                                 height = half,
-                                                              })
-                                                    save_relative_geometry(c, curr, area)
-                                                    auto_tile[c].mode = "down"
-                                                elseif auto_tile[c] then
-                                                    local old = auto_tile[c].old
-                                                    if old.x == 0 and old.y == 0 then
-                                                        old = {
-                                                            x = area.x + (area.width / 4),
-                                                            y = area.y + (area.height / 4),
-                                                            width = area.width / 2,
-                                                            height = area.height / 2,
-                                                        }
-                                                    else
-                                                        old.x = old.x + area.x
-                                                        old.y = old.y + area.y
-                                                    end
-                                                    c:geometry(old)
-                                                    awful.placement.no_offscreen(c)
-                                                    auto_tile[c] = nil
-                                                end
-                                             end, { description = "Dock / move docked window", group = "awesome gobolinux" })
+    corner("top",    "left",  { modkey }, "KP_Home"),
+    corner("top",    "right", { modkey }, "KP_Prior"),
+    corner("bottom", "left",  { modkey }, "KP_End"),
+    corner("bottom", "right", { modkey }, "KP_Next"),
+
+    awful.key({ modkey }, "KP_Left", dock_left, { description = "Dock / move docked window", group = "awesome gobolinux" }),
+    awful.key({ modkey }, "KP_Right", dock_right, { description = "Dock / move docked window", group = "awesome gobolinux" }),
+    awful.key({ modkey }, "KP_Up", dock_up, { description = "Dock / move docked window", group = "awesome gobolinux" }),
+    awful.key({ modkey }, "KP_Down", dock_down, { description = "Dock / move docked window", group = "awesome gobolinux" }),
+
+    awful.key({ modkey }, "Left", dock_left, { description = "Dock / move docked window", group = "awesome gobolinux" }),
+    awful.key({ modkey }, "Right", dock_right, { description = "Dock / move docked window", group = "awesome gobolinux" }),
+    awful.key({ modkey }, "Up", dock_up, { description = "Dock / move docked window", group = "awesome gobolinux" }),
+    awful.key({ modkey }, "Down", dock_down, { description = "Dock / move docked window", group = "awesome gobolinux" })
 )
 
 -- Bind all key numbers to tags.
@@ -744,6 +785,7 @@ end
 
 local function custom_move(c)
     if c.maximized then
+        c.border_width = 0
         mousegrabber.run(
             function (_mouse)
                 if _mouse.buttons[1] then
@@ -757,6 +799,7 @@ local function custom_move(c)
                 return false
             end, "fleur")
     else
+        undock_auto_tile(c)
         awful.mouse.client.move(c)
     end
 end
@@ -814,9 +857,19 @@ local no_titlebars = {
     ["alsamixer"] = true,
 }
 
+local function adjust_border_width(c)
+    if c.maximized then
+        c.border_width = 0
+    else
+        c.border_width = beautiful.border_width
+    end
+end
+
 -- {{{ Signals
 -- Signal function to execute when a new client appears.
 client.connect_signal("manage", function (c, startup)
+
+    adjust_border_width(c)
     
     --[[
     -- Enable sloppy focus
@@ -896,12 +949,6 @@ end)
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 
-client.connect_signal("property::maximized", function(c)
-    if c.maximized then
-        c.border_width = 0
-    else
-        c.border_width = beautiful.border_width
-    end
-end)
+client.connect_signal("property::maximized", adjust_border_width)
 
 -- }}}
