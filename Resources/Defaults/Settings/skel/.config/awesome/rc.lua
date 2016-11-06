@@ -879,13 +879,66 @@ client.connect_signal("manage", function (c, startup)
             client.focus = c
         end
     end)
-    ]]
+    --]]
 
+    -- Border resize
     c:connect_signal("button::press", function(c, x, y, button)
         if not c.maximized and button == 1 and (x < 0 or x >= c.width or y < 0 or y >= c.height) then
             awful.mouse.client.resize(c)
         end
     end)
+
+    
+    --[[
+    -- Border mouse cursor
+    -- Has issues with some applications (GTK+2?)
+    c:connect_signal("mouse::move", function(c, x, y)
+        if not c.maximized then
+            if x < 0 then
+                local third = c.height / 3
+                if y < third then
+                    root.cursor("top_left_corner")
+                elseif y <= third * 2 then
+                    root.cursor("left_side")
+                else
+                    root.cursor("bottom_left_corner")
+                end
+                return
+            elseif x >= c.width then
+                local third = c.height / 3
+                if y < third then
+                    root.cursor("top_right_corner")
+                elseif y <= third * 2 then
+                    root.cursor("right_side")
+                else
+                    root.cursor("bottom_right_corner")
+                end
+                return
+            elseif y < 0 then
+                local third = c.width / 3
+                if x < third then
+                    root.cursor("top_left_corner")
+                elseif x <= third * 2 then
+                    root.cursor("top_side")
+                else
+                    root.cursor("top_right_corner")
+                end
+                return
+            elseif y >= c.height then
+                local third = c.width / 3
+                if x < third then
+                    root.cursor("bottom_left_corner")
+                elseif x <= third * 2 then
+                    root.cursor("bottom_side")
+                else
+                    root.cursor("bottom_right_corner")
+                end
+                return
+            end
+        end
+        root.cursor("left_ptr")
+    end)
+    --]]
 
     if not startup then
         -- Set the windows at the slave,
