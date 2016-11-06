@@ -48,12 +48,14 @@ local function quality_icon(quality)
    end
 end
 
+local run = awful.spawn and awful.spawn.with_shell or awful.util.spawn_with_shell
+
 local function disconnect()
-   awful.util.spawn_with_shell("gobonet disconnect &")
+   run("gobonet disconnect")
 end
 
 local function forget(essid)
-   awful.util.spawn_with_shell("gobonet forget '"..essid:gsub("'", "'\\''").."' &")
+   run("gobonet forget '"..essid:gsub("'", "'\\''").."'")
 end
 
 local function compact_entries(entries)
@@ -77,7 +79,10 @@ function wifi.new()
    local is_scanning = function() return false end
    local is_connecting = function() return false end
 
-   local function animated_operation(cmd, popup_menu)
+   local function animated_operation(args)
+      local cmd = args.command
+      local popup_menu = args.popup_menu_when_done or false
+      if not cmd then return end
       local waiting
       local is_waiting = function()
          if not waiting then return false end
@@ -129,15 +134,29 @@ function wifi.new()
          return is_waiting
       end
    end
+   
+   local function is_external_scanning()
+      local pidfilename = os.getenv("HOME").."/.cache/GoboNet/wifi/.connecting.pid"
+      local pidfd = io.open(pidfilename, "r")
+      if not pidfd then return false end
+      local pid = pidfd:read("*l")
+      pidfd:close()
+      local statfilename = "/proc/"..pid.."/stat"
+      local statfd = io.open(statfilename, "r")
+      if not statfd then return false end
+      statfd:close()
+      is_scanning = animated_operation { command = "bash -c 'while [ -e \""..statfilename.."\" ]; do sleep 0.5; done; rm \""..pidfilename.."\"'" } ()
+      return true
+   end
 
-   local rescan = animated_operation("gobonet_backend full-scan wlan0", true)
+   local rescan = animated_operation { command = "gobonet_backend full-scan wlan0", popup_menu_when_done = true }
 
    local function connect(essid)
-      return animated_operation("gobonet connect '"..essid:gsub("'", "'\\''").."'", false)()
+      return animated_operation { command = "gobonet connect '"..essid:gsub("'", "'\\''").."'" } ()
    end
    
    local function update()
-      if is_scanning() or is_connecting() then
+      if is_scanning() or is_connecting() then -- or is_external_scanning() then
          return
       end
       local wifi_level = read_wifi_level()
