@@ -55,15 +55,15 @@ local ALT = "Mod1"
 local modkey = "Mod4"
 
 -- Launch compositor
-awful.util.spawn_with_shell("compton -cf "..
-                            "--fade-delta 5 "..
-                            "--shadow-radius 11 "..
-                            "--shadow-green 1.0 "..
-                            "--shadow-blue 1.0 "..
-                            "--no-dock-shadow "..
-                            "--clear-shadow "..
-                            "--no-dnd-shadow "..
-                            "--shadow-exclude '!focused' &")
+awful.spawn.with_shell("compton -cf "..
+                    "--fade-delta 5 "..
+                    "--shadow-radius 11 "..
+                    "--shadow-green 1.0 "..
+                    "--shadow-blue 1.0 "..
+                    "--no-dock-shadow "..
+                    "--clear-shadow "..
+                    "--no-dnd-shadow "..
+                    "--shadow-exclude '!focused'")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
