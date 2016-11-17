@@ -3,11 +3,9 @@ xsetroot -solid '#000000' -cursor_name 'left_ptr'
 # Load user preferences
 [ -e ~/.Xresources ] && xrdb -merge ~/.Xresources
 
-# Workaround for broken input device detection
-[ -e /bin/udevadm ] && udevadm trigger
 # Update the MIME database
 [ -e /bin/update-mime-database ] && \
-    update-mime-database /Data/Variable/xdg/mime | grep -v Unknown
+    update-mime-database /Data/Variable/xdg/mime & &> /dev/null
 
 [ -x /bin/awesome ] && exec awesome
 [ -x /bin/enlightenment_start ] && exec dbus-launch --exit-with-session enlightenment_start
