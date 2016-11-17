@@ -723,10 +723,10 @@ local clientkeys = awful.util.table.join(
     corner("bottom", "left",  { modkey }, "KP_End"),
     corner("bottom", "right", { modkey }, "KP_Next"),
 
-    awful.key({ modkey }, "KP_Left", dock_left, { description = "Dock / move docked window", group = "awesome gobolinux" }),
-    awful.key({ modkey }, "KP_Right", dock_right, { description = "Dock / move docked window", group = "awesome gobolinux" }),
-    awful.key({ modkey }, "KP_Up", dock_up, { description = "Dock / move docked window", group = "awesome gobolinux" }),
-    awful.key({ modkey }, "KP_Down", dock_down, { description = "Dock / move docked window", group = "awesome gobolinux" }),
+    awful.key({ modkey }, "KP_Left", dock_left),
+    awful.key({ modkey }, "KP_Right", dock_right),
+    awful.key({ modkey }, "KP_Up", dock_up),
+    awful.key({ modkey }, "KP_Down", dock_down),
 
     awful.key({ modkey }, "Left", dock_left, { description = "Dock / move docked window", group = "awesome gobolinux" }),
     awful.key({ modkey }, "Right", dock_right, { description = "Dock / move docked window", group = "awesome gobolinux" }),
