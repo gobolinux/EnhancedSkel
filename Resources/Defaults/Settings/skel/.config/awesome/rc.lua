@@ -699,8 +699,8 @@ local clientkeys = awful.util.table.join(
         {description = "Minimize", group = "client"}),
     awful.key({ modkey,           }, "m",
         function (c)
-            c.maximized_horizontal = not c.maximized_horizontal
             c.maximized_vertical   = not c.maximized_vertical
+            c.maximized_horizontal = not c.maximized_horizontal
         end,
         {description = "Maximize", group = "client"}),
     awful.key({ ALT,           }, "F4",      function (c) kill_window_menu(c); c:kill() end,
@@ -814,6 +814,12 @@ local clientbuttons = awful.util.table.join(
 root.keys(globalkeys)
 -- }}}
 
+local no_decorations = {
+    ["plugin-container"] = true,
+    ["Audacious"] = true,
+    ["alsamixer"] = true,
+}
+
 -- {{{ Rules
 -- Rules to apply to new clients (through the "manage" signal).
 awful.rules.rules = {
@@ -832,14 +838,16 @@ awful.rules.rules = {
       properties = { floating = true } },
     { rule = { class = "gimp" },
       properties = { floating = true } },
-    { rule = { class = "Audacious" },
-      properties = { floating = true, border_width = 0 } },
-    { rule = { name = "alsamixer" },
-      properties = { floating = true, border_width = 0 } },
     -- Set Firefox to always map on tags number 2 of screen 1.
     -- { rule = { class = "Firefox" },
     --   properties = { tag = tags[1][2] } },
 }
+
+for name, _ in pairs(no_decorations) do
+    table.insert(awful.rules.rules, { rule = { class = name }, properties = { floating = true, border_width = 0 }})
+    table.insert(awful.rules.rules, { rule = { name  = name }, properties = { floating = true, border_width = 0 }})
+end
+
 -- }}}
 
 local function hover_bright(name, w)
@@ -851,14 +859,8 @@ local function hover_bright(name, w)
     return w
 end
 
-local no_titlebars = {
-    ["plugin-container"] = true,
-    ["Audacious"] = true,
-    ["alsamixer"] = true,
-}
-
 local function adjust_border_width(c)
-    if c.maximized then
+    if c.maximized or (no_decorations[c.name] or no_decorations[c.class]) then
         c.border_width = 0
     else
         c.border_width = beautiful.border_width
@@ -953,7 +955,7 @@ client.connect_signal("manage", function (c, startup)
     end
 
     local titlebars_enabled = true
-    if titlebars_enabled and ((c.type == "normal" or c.type == "dialog") and not (no_titlebars[c.name] or no_titlebars[c.class])) then
+    if titlebars_enabled and ((c.type == "normal" or c.type == "dialog") and not (no_decorations[c.name] or no_decorations[c.class])) then
         -- buttons for the titlebar
         local buttons = awful.util.table.join(
                 awful.button({ }, 1, function()
