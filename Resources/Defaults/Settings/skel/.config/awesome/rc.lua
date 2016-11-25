@@ -461,7 +461,10 @@ local globalkeys = awful.util.table.join(
     ),
     awful.key({ }, "XF86AudioMute",        function() sound_widget:toggle_mute() end,
         {description = "Toggle mute", group = "multimedia"}
-    )
+    ),
+    awful.key({ }, "XF86MonBrightnessDown", function() os.execute("xbacklight -dec 10") end),
+    awful.key({ }, "XF86MonBrightnessUp",   function() os.execute("xbacklight -inc 10") end)
+
 )
 
 local window_menus = {}
