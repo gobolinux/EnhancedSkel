@@ -17,6 +17,7 @@ URxvt*color12: #3030ff
 
 URxvt.perl-ext-common: default,matcher,tabbedex
 ! tabbedex settings
+URxvt.tabbed.no-tabbedex-keys: yes
 URxvt.tabbed.tabbar-fg: 2
 URxvt.tabbed.tabbar-bg: 0
 URxvt.tabbed.tab-fg: 3
@@ -27,7 +28,6 @@ URxvt.tabbed.title: yes
 URxvt.tabbed.title-fg: 3
 URxvt.tabbed.title-bg: 0
 URxvt.keysym.C-A-t: perl:tabbedex:new_tab
-URxvt.keysym.C-A-Up: perl:tabbedex:rename_tab
 URxvt.keysym.C-A-Right: perl:tabbedex:next_tab
 URxvt.keysym.C-A-Left: perl:tabbedex:prev_tab
 URxvt.keysym.C-A-S-Right: perl:tabbedex:move_tab_right
