@@ -10,6 +10,8 @@ local beautiful = require("beautiful")
 local naughty = require("naughty")
 local spawn = require("awful.spawn")
 
+local wlan_interface
+
 local function pread(cmd)
    local pd = io.popen(cmd, "r")
    if not pd then
@@ -75,7 +77,15 @@ function wifi.new()
    local widget = wibox.widget.imagebox()
    local menu
    local wifi_menu_fn
+   
+   if not wlan_interface then
+      wlan_interface = pread("gobonet interface")
+   end
 
+   if not wlan_interface then
+      return widget
+   end
+   
    local is_scanning = function() return false end
    local is_connecting = function() return false end
 
@@ -149,7 +159,7 @@ function wifi.new()
       return true
    end
 
-   local rescan = animated_operation { command = "gobonet_backend full-scan wlan0", popup_menu_when_done = true }
+   local rescan = animated_operation { command = "gobonet_backend full-scan "..wlan_interface, popup_menu_when_done = true }
 
    local function connect(essid)
       return animated_operation { command = "gobonet connect '"..essid:gsub("'", "'\\''").."'" } ()
@@ -186,7 +196,7 @@ function wifi.new()
       local my_essid = iwconfig:match('ESSID:"([^\n]*)"%s*\n')
       local scan = ""
       if not is_scanning() then
-         scan = pread("gobonet_backend quick-scan wlan0")
+         scan = pread("gobonet_backend quick-scan "..wlan_interface)
       end
       local entries = {}
       local curr_entry
