@@ -876,6 +876,19 @@ client.connect_signal("manage", function (c, startup)
 
     adjust_border_width(c)
     
+    -- When we only have one screen and we are restoring
+    -- windows that were closed in the second screen,
+    -- move them to the first screen.
+    if screen.count() == 1 then
+        local geo = screen[1].geometry
+        if c.x > geo.width or c.x < geo.x then
+            c.x = geo.x
+        end
+        if c.y > geo.height or c.y < geo.y then
+            c.y = geo.y
+        end
+    end
+    
     --[[
     -- Enable sloppy focus
     c:connect_signal("mouse::enter", function(c)
