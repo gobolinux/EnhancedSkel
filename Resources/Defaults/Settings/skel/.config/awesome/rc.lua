@@ -10,10 +10,10 @@ local wibox = require("wibox")
 local naughty = require("naughty")
 local menubar = require("menubar")
 
-local wifi = require("wifi")
-local sound = require("sound")
-local battery = require("battery")
-local alttab = require("alttab")
+local gobonet = require("gobo.awesome.gobonet")
+local sound = require("gobo.awesome.sound")
+local battery = require("gobo.awesome.battery")
+local alttab = require("gobo.awesome.alttab")
 local menu_gen = require("menubar.menu_gen")
 local icon_theme = require("menubar.icon_theme")
 local hotkeys_popup = require("awful.hotkeys_popup.widget")
@@ -303,7 +303,7 @@ for s = 1, screen.count() do
     local right_layout = wibox.layout.fixed.horizontal()
     if s == 1 then
         right_layout:add(wibox.widget.systray())
-        right_layout:add(wifi.new())
+        right_layout:add(gobonet.new())
         right_layout:add(battery.new())
         right_layout:add(sound_widget)
     end
