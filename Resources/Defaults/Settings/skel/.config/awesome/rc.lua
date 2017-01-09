@@ -55,17 +55,6 @@ local ALT = "Mod1"
 -- However, you can use another modifier like Mod1, but it may interact with others.
 local modkey = "Mod4"
 
--- Launch compositor
-awful.spawn.with_shell("compton -cf "..
-                       "--fade-delta 5 "..
-                       "--shadow-radius 11 "..
-                       "--shadow-green 1.0 "..
-                       "--shadow-blue 1.0 "..
-                       "--no-dock-shadow "..
-                       "--clear-shadow "..
-                       "--no-dnd-shadow "..
-                       "--shadow-exclude '!focused'")
-
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
 if awesome.startup_errors then
