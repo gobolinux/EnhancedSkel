@@ -142,7 +142,7 @@ local myawesomemenu = {
    { "Manual", terminal .. " -e pinfo awesome" },
    { "Edit Config", editor_cmd .. " " .. awesome.conffile },
    { "Restart", awesome.restart },
-   { "Quit", awesome.quit }
+   { "Quit", function() awesome.quit() end }
 }
 
 local mymainmenu = awful.menu({
