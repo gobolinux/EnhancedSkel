@@ -39,6 +39,7 @@ sound_widget.terminal = terminal
 local beautiful = require("beautiful")
 beautiful.init("~/.config/awesome/themes/neon/theme.lua")
 
+awful.titlebar.enable_tooltip = false
 hotkeys_popup.title_font = "Lode Sans Mono Bold 12"
 hotkeys_popup.description_font = "Lode Sans Mono 12"
 hotkeys_popup.group_margin = 20
