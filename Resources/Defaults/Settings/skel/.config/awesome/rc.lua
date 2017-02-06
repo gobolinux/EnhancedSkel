@@ -32,6 +32,9 @@ local editor = os.getenv("EDITOR") or "nano"
 local editor_cmd = terminal .. " -e " .. editor
 local browser = "firefox"
 
+local titlebars_enabled = true
+local sloppy_focus = false
+
 local sound_widget = sound.new()
 sound_widget.terminal = terminal
 
@@ -63,6 +66,7 @@ if awesome.startup_errors then
                     title = "Oops, there were errors during startup!",
                     text = awesome.startup_errors })
 end
+
 
 -- Handle runtime errors after startup
 do
@@ -722,6 +726,8 @@ awful.rules.rules = {
    { rule = { class = "MPlayer" }, properties = { floating = true } },
    { rule = { class = "pinentry" }, properties = { floating = true } },
    { rule = { class = "gimp" }, properties = { floating = true } },
+   -- Add titlebars to normal clients and dialogs
+   { rule_any = {type = { "normal", "dialog" } }, properties = { titlebars_enabled = true } },
 }
 
 local no_decorations = {
@@ -731,8 +737,8 @@ local no_decorations = {
 }
 
 for name, _ in pairs(no_decorations) do
-   table.insert(awful.rules.rules, { rule = { class = name }, properties = { floating = true, border_width = 0 }})
-   table.insert(awful.rules.rules, { rule = { name  = name }, properties = { floating = true, border_width = 0 }})
+   table.insert(awful.rules.rules, { rule = { class = name }, properties = { floating = true, border_width = 0, titlebars_enabled = false }})
+   table.insert(awful.rules.rules, { rule = { name  = name }, properties = { floating = true, border_width = 0, titlebars_enabled = false }})
 end
 
 local function hover_bright(name, w)
@@ -749,6 +755,14 @@ local function adjust_border_width(c)
       c.border_width = 0
    else
       c.border_width = beautiful.border_width
+   end
+end
+
+local function normal_border(c)
+   if c == client.focus then
+      c.border_color = beautiful.border_focus
+   else
+      c.border_color = beautiful.border_normal
    end
 end
 
@@ -771,15 +785,14 @@ client.connect_signal("manage", function(c, startup)
       end
    end
 
-   --[[
-   -- Enable sloppy focus
-   c:connect_signal("mouse::enter", function(c)
-      if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
-         and awful.client.focus.filter(c) then
-         client.focus = c
-      end
-   end)
-   --]]
+   if sloppy_focus then
+      c:connect_signal("mouse::enter", function(c)
+         if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
+            and awful.client.focus.filter(c) then
+            client.focus = c
+         end
+      end)
+   end
 
    -- Border resize
    c:connect_signal("button::press", function(c, x, y, button)
@@ -796,53 +809,72 @@ client.connect_signal("manage", function(c, startup)
       end
    end
 
-   local titlebars_enabled = true
-   if titlebars_enabled and ((c.type == "normal" or c.type == "dialog") and not (no_decorations[c.name] or no_decorations[c.class])) then
-      -- buttons for the titlebar
-      local buttons = awful.util.table.join(
-         awful.button({}, 1,
-            function()
-               client.focus = c
-               c:raise()
-               window_menu.hide(c)
-               docking.smart_mouse_move(c)
-            end),
-         awful.button({}, 3,
-            function()
-               client.focus = c
-               c:raise()
-               window_menu.show(c)
-            end)
-      )
+end)
 
-      -- Widgets that are aligned to the left
-      local left_layout = wibox.layout.fixed.horizontal()
-      left_layout:add(awful.titlebar.widget.iconwidget(c))
-      --left_layout:add(awful.titlebar.widget.stickybutton(c))
-      --left_layout:add(awful.titlebar.widget.ontopbutton(c))
-      left_layout:buttons(buttons)
-
-      -- Widgets that are aligned to the right
-      local right_layout = wibox.layout.fixed.horizontal()
-      right_layout:add(hover_bright("minimize", awful.titlebar.widget.minimizebutton(c)))
-      right_layout:add(hover_bright("maximized", awful.titlebar.widget.maximizedbutton(c)))
-      right_layout:add(hover_bright("close", awful.titlebar.widget.closebutton(c)))
-
-      -- The title goes in the middle
-      local middle_layout = wibox.layout.flex.horizontal()
-      local title = awful.titlebar.widget.titlewidget(c)
-      title:set_align("center")
-      middle_layout:add(title)
-      middle_layout:buttons(buttons)
-
-      -- Now bring it all together
-      local layout = wibox.layout.align.horizontal()
-      layout:set_left(left_layout)
-      layout:set_right(right_layout)
-      layout:set_middle(middle_layout)
-
-      awful.titlebar(c):set_widget(layout)
+client.connect_signal("request::titlebars", function(c, context, hints)
+   if not titlebars_enabled then
+      return 
    end
+   
+   -- buttons for the titlebar
+   local buttons = awful.util.table.join(
+      awful.button({}, 1,
+         function()
+            client.focus = c
+            c:raise()
+            window_menu.hide(c)
+            docking.smart_mouse_move(c)
+         end),
+      awful.button({}, 3,
+         function()
+            client.focus = c
+            c:raise()
+            window_menu.show(c)
+         end)
+   )
+
+   -- Widgets that are aligned to the left
+   local left_layout = wibox.layout.fixed.horizontal()
+   left_layout:add(awful.titlebar.widget.iconwidget(c))
+   --left_layout:add(awful.titlebar.widget.stickybutton(c))
+   --left_layout:add(awful.titlebar.widget.ontopbutton(c))
+   left_layout:buttons(buttons)
+
+   -- Widgets that are aligned to the right
+   local right_layout = wibox.layout.fixed.horizontal()
+   right_layout:add(hover_bright("minimize", awful.titlebar.widget.minimizebutton(c)))
+   right_layout:add(hover_bright("maximized", awful.titlebar.widget.maximizedbutton(c)))
+   right_layout:add(hover_bright("close", awful.titlebar.widget.closebutton(c)))
+
+   -- The title goes in the middle
+   local middle_layout = wibox.layout.flex.horizontal()
+   local title = awful.titlebar.widget.titlewidget(c)
+   title:set_align("center")
+   middle_layout:add(title)
+   middle_layout:buttons(buttons)
+
+   -- Now bring it all together
+   local layout = wibox.layout.align.horizontal()
+   layout:set_left(left_layout)
+   layout:set_right(right_layout)
+   layout:set_middle(middle_layout)
+
+   awful.titlebar(c):set_widget(layout)
+
+   c:connect_signal("mouse::move", function(c, x, y)
+      if x < 0 or x >= c.width or y < 0 or y >= c.height then
+         if client.focus == c then
+            c.border_color = "#ffffff"
+         else
+            c.border_color = "#777777"
+         end
+      else
+         normal_border(c)
+      end
+   end)
+   c:connect_signal("mouse::enter", normal_border)
+   c:connect_signal("mouse::leave", normal_border)
+
 end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
