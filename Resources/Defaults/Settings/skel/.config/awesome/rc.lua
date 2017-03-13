@@ -146,7 +146,7 @@ local myawesomemenu = {
    { "Hotkeys", function() return false, show_help end},
    { "Manual", terminal .. " -e pinfo awesome" },
    { "Edit Config", editor_cmd .. " " .. awesome.conffile },
-   { "Restart", awesome.restart },
+   { "Restart Awesome", awesome.restart },
    { "Quit", function() awesome.quit() end }
 }
 
