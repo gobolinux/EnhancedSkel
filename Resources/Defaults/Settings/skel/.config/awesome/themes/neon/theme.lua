@@ -359,6 +359,8 @@ theme.wifi_2_icon           = "~/.config/awesome/themes/neon/wifi_2.png"
 theme.wifi_1_icon           = "~/.config/awesome/themes/neon/wifi_1.png"
 theme.wifi_0_icon           = "~/.config/awesome/themes/neon/wifi_0.png"
 theme.wifi_down_icon         = "~/.config/awesome/themes/neon/wifi_down.png"
+theme.wired_up_icon         = "~/.config/awesome/themes/neon/wired_up.png"
+theme.wired_down_icon         = "~/.config/awesome/themes/neon/wired_down.png"
 
 theme.check_icon       = "~/.config/awesome/themes/neon/check.png"
 
