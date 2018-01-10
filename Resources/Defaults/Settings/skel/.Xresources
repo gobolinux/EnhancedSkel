@@ -1,6 +1,21 @@
 Xcursor.theme: neon
 Xcursor.size: 24
 
+URxvt.cursorColor: green
+URxvt.font: *-lode sans mono-*
+URxvt.boldFont: *-lode sans mono-*
+URxvt.italicFont: *-lode sans mono-*
+URxvt.boldItalicFont: *-lode sans mono-*
+URxvt.depth: 32
+URxvt.background: rgba:0000/0000/0000/e5bb
+URxvt.foreground: #bcc
+URxvt.scrollBar: true
+URxvt.scrollBar_right: true
+URxvt.scrollBar_floating: false
+URxvt.saveLines: 100000
+URxvt.internalBorder: 0
+URxvt.termName: rxvt
+
 URxvt.clipboard.autocopy: true
 URxvt.keysym.S-Insert: \033[2$
 URxvt.keysym.C-S-Up: \033[1;6A

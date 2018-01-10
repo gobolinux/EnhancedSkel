@@ -27,7 +27,7 @@ local client = client
 local awesome = awesome
 local root = root
 
-local terminal = "urxvt -cr green -fn '*-lode sans mono-*' -fb '*-lode sans mono-*' -fi '*-lode sans mono-*' -fbi '*-lode sans mono-*' -depth 32 -bg rgba:0000/0000/0000/e5bb  -fg '#bcc' -sb -sr +st -sl 100000 -b 0 -tn rxvt"
+local terminal = "urxvt"
 local editor = os.getenv("EDITOR") or "nano"
 local editor_cmd = terminal .. " -e " .. editor
 local browser = "firefox"
