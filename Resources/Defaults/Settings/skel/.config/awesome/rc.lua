@@ -169,7 +169,9 @@ menu_gen.generate(function(entries)
    end
 
    for _, entry in ipairs(entries) do
-      table.insert(cat_submenus[entry.category], { entry.name, entry.cmdline, entry.icon })
+      if entry.category ~= nil and entry.name ~= nil and entry.cmdline ~= nil and entry.icon ~= nil then
+         table.insert(cat_submenus[entry.category], { entry.name, entry.cmdline, entry.icon })
+      end
    end
    table.sort(cat_keys)
    for _, k in ipairs(cat_keys) do
