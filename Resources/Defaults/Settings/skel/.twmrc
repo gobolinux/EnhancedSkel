@@ -148,7 +148,7 @@ menu "WindowMenu"
 "Kill"		f.destroy
 }
 
-RightTitleButton "/Programs/Xorg/Current/include/X11/bitmaps/opendotMask" = f.fullzoom
-RightTitleButton "/Programs/Xorg/Current/include/X11/bitmaps/opendot" = f.iconify
+RightTitleButton "/System/Index/include/X11/bitmaps/opendotMask" = f.fullzoom
+RightTitleButton "/System/Index/include/X11/bitmaps/opendot" = f.iconify
 
-LeftTitleButton "/Programs/Xorg/Current/include/X11/bitmaps/dropbar7" = f.delete
+LeftTitleButton "/System/Index/include/X11/bitmaps/dropbar7" = f.delete
