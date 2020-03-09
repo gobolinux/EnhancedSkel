@@ -15,6 +15,7 @@ local sound = require("gobo.awesome.sound")
 local battery = require("gobo.awesome.battery")
 local alttab = require("gobo.awesome.alttab")
 local docking = require("gobo.awesome.docking")
+local light = require("gobo.awesome.light")
 local window_menu = require("gobo.awesome.window_menu")
 local menu_gen = require("menubar.menu_gen")
 local icon_theme = require("menubar.icon_theme")
@@ -35,6 +36,7 @@ local browser = "firefox"
 local titlebars_enabled = true
 local sloppy_focus = false
 
+local light_widget = light.new()
 local sound_widget = sound.new()
 sound_widget.terminal = terminal
 
@@ -273,6 +275,7 @@ for s = 1, screen.count() do
       right_layout:add(wibox.widget.systray())
       right_layout:add(gobonet.new())
       right_layout:add(battery.new())
+      right_layout:add(light_widget)
       right_layout:add(sound_widget)
    end
    right_layout:add(mytextclock)
@@ -528,15 +531,13 @@ local globalkeys = awful.util.table.join(
       end,
       { description = "Toggle mute", group = "multimedia" }),
    
-   awful.key({}, "XF86MonBrightnessDown",
-      function()
-         os.execute("xbacklight -dec 10")
-      end),
+   awful.key({}, "XF86MonBrightnessDown", function() light_widget:inc_brightness(5) end,
+      { description = "Raise screen brightness", group = "multimedia" }
+   ),
    
-   awful.key({}, "XF86MonBrightnessUp",
-      function()
-         os.execute("xbacklight -inc 10")
-      end)
+   awful.key({}, "XF86MonBrightnessUp", function() light_widget:dec_brightness(5) end,
+      { description = "Lower screen brightness", group = "multimedia" }
+   )
 )
 
 local delta = 64
