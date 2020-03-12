@@ -2,10 +2,10 @@ Xcursor.theme: neon
 Xcursor.size: 24
 
 URxvt.cursorColor: green
-URxvt.font: *-lode sans mono-*
-URxvt.boldFont: *-lode sans mono-*
-URxvt.italicFont: *-lode sans mono-*
-URxvt.boldItalicFont: *-lode sans mono-*
+URxvt.font: xft:Lode Sans-12
+URxvt.boldFont: xft:Lode Sans-12
+URxvt.italicFont: xft:Lode Sans-12
+URxvt.boldItalicFont: xft:Lode Sans-12
 URxvt.depth: 32
 URxvt.background: rgba:0000/0000/0000/e5bb
 URxvt.foreground: #bcc
