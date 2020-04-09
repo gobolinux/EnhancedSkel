@@ -43,7 +43,7 @@ sound_widget.terminal = terminal
 
 -- Theme handling library
 local beautiful = require("beautiful")
-beautiful.init("~/.config/awesome/themes/neon/theme.lua")
+beautiful.init("~/.config/awesome/themes/neon017/theme.lua")
 
 awful.titlebar.enable_tooltip = false
 hotkeys_popup.title_font = "xft:Lode Sans Mono Bold-12"
@@ -102,7 +102,25 @@ local layouts = {
 }
 
 -- Wallpaper
-if beautiful.wallpaper then
+if beautiful.animated_wallpaper then
+   local wallpaper = require("gears.wallpaper")
+   local cairo = require("lgi").cairo
+   for s = 1, screen.count() do
+      local geom, wcr = wallpaper.prepare_context(screen[s])
+      wcr:set_source_rgb(0,0,0)
+      wcr.operator = cairo.Operator.SOURCE
+      wcr:paint()
+   end
+   
+   local anim = gears.timer({timeout=0.5})
+   anim:connect_signal("timeout", function()
+      for s = 1, screen.count() do
+         beautiful.animated_wallpaper(s)
+      end
+      anim:stop()
+   end)
+   anim:start()
+elseif beautiful.wallpaper then
    local wallpaper = beautiful.wallpaper
    for s = 1, screen.count() do
       if type(wallpaper) == "function" then
@@ -130,6 +148,12 @@ end
 
 local function layout_fn(mode) return function() awful.layout.set(mode) end end
 
+local function regenerate_wallpaper()
+   for s = 1, screen.count() do
+      beautiful.animated_wallpaper(s)
+   end
+end
+
 -- Menu
 -- Create a laucher widget and a main menu
 local myawesomemenu = {
@@ -149,6 +173,7 @@ local myawesomemenu = {
    { "Hotkeys", function() return false, show_help end},
    { "Manual", terminal .. " -e pinfo awesome" },
    { "Edit Config", editor_cmd .. " " .. awesome.conffile },
+   { "Regenerate Wallpaper", regenerate_wallpaper },
    { "Restart Awesome", awesome.restart },
    { "Quit", function() awesome.quit() end }
 }
@@ -400,11 +425,7 @@ local globalkeys = awful.util.table.join(
       { description = "Quit Awesome", group = "awesome" }),
 
    awful.key({ modkey }, "a",
-      function()
-         for s = 1, screen.count() do
-            beautiful.animated_wallpaper(s)
-         end
-      end,
+      regenerate_wallpaper,
       { description = "Regenerate GoboLinux wallpaper", group = "awesome gobolinux" }),
 
    awful.key({ modkey }, "l",
