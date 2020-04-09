@@ -9,6 +9,8 @@
 -- {{{ Main
 local theme = {}
 
+local SCANLINES = true
+
 math.randomseed(os.time())
 
 local naughty = require("naughty")
@@ -95,6 +97,19 @@ theme.animated_wallpaper = function()
       
       local width = screen[s].geometry.width
       local height = screen[s].geometry.height
+      
+      local scanlines
+      if SCANLINES then
+         scanlines = cairo.ImageSurface("RGB32", width, height)
+         local scr = cairo.Context(scanlines)
+         scr:set_line_width(width / 720)
+         scr:set_source_rgb(0, 0, 0)
+         for i = 1, 256 do
+            scr:move_to(0, height / 256 * i)
+            scr:line_to(width, height / 256 * i)
+         end
+         scr:stroke()
+      end
 
       local count = width / 32  -- for 1920 == 60
       local step = width / 48   -- for 1920 == 40
@@ -123,6 +138,11 @@ theme.animated_wallpaper = function()
          local lw = width / 720 / 2
          for i = 1, l do
             lw = draw_line(wcr, grid, lw, r, g, b, count, i)
+         end
+         
+         if SCANLINES then
+            wcr:set_source_surface(scanlines, 0, 0)
+            wcr:paint()
          end
          
          l = l + 1
