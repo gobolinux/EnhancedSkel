@@ -7,6 +7,9 @@ xsetroot -solid '#000000' -cursor_name 'left_ptr'
 [ -e /bin/update-mime-database ] && \
     update-mime-database /Data/Variable/xdg/mime & &> /dev/null
 
+# Launch PulseAudio daemon
+[ -e /bin/pulseaudio ] && /bin/pulseaudio --start
+
 [ -x /bin/awesome ] && {
    [ -x /bin/compton ] && {
       compton -bcf \
