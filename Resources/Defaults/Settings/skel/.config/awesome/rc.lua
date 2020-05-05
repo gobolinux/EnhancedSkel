@@ -554,12 +554,12 @@ local globalkeys = awful.util.table.join(
       end,
       { description = "Toggle mute", group = "multimedia" }),
    
-   awful.key({}, "XF86MonBrightnessDown", function() light_widget:inc_brightness(5) end,
-      { description = "Raise screen brightness", group = "multimedia" }
+   awful.key({}, "XF86MonBrightnessDown", function() light_widget:dec_brightness(5) end,
+      { description = "Lower screen brightness", group = "multimedia" }
    ),
    
-   awful.key({}, "XF86MonBrightnessUp", function() light_widget:dec_brightness(5) end,
-      { description = "Lower screen brightness", group = "multimedia" }
+   awful.key({}, "XF86MonBrightnessUp", function() light_widget:inc_brightness(5) end,
+      { description = "Raise screen brightness", group = "multimedia" }
    )
 )
 
