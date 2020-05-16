@@ -760,6 +760,7 @@ local no_decorations = {
     ["plugin-container"] = true,
     ["Audacious"] = true,
     ["alsamixer"] = true,
+    ["ncpamixer"] = true,
 }
 
 for name, _ in pairs(no_decorations) do
