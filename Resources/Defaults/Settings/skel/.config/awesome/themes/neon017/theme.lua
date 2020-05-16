@@ -215,7 +215,7 @@ end
 -- }}}
 
 -- {{{ Styles
-theme.font          = "xft:Lode Sans 10"
+theme.font          = "xft:Lode Sans-10"
 naughty.config.defaults.font = "sans 10"
 naughty.config.presets.critical.bg = { type = "linear", from = {0,0}, to = {0,35}, stops = { {0, "#FF0000"}, {1, "#770000"} } }
 naughty.config.defaults.fg = "#97b9b9"
