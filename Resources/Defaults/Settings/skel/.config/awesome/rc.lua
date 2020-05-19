@@ -326,8 +326,17 @@ root.buttons(awful.util.table.join(
    --awful.button({}, 5, awful.tag.viewprev)
 ))
 
+local function screenshot()
+   local name = "screenshot-" .. os.date("%Y-%m-%d-%H-%M-%S") .. ".png"
+   os.execute("import ~/"..name.."; cat  ~/"..name.." | xclip -i -selection clipboard -t image/png")
+end
+
 -- Key bindings
 local globalkeys = awful.util.table.join(
+
+   awful.key({}, "Print",
+      screenshot,
+      { description = "Screenshot", group = "awesome gobolinux" }),
 
    awful.key({ modkey }, "s",
       show_help,
