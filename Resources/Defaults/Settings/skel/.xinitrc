@@ -12,13 +12,14 @@ xsetroot -solid '#000000' -cursor_name 'left_ptr'
 
 [ -x /bin/awesome ] && {
    [ -x /bin/compton ] && {
-      compton -bcf \
+      picom -bcf \
+         -l -15 \
+         -t -13 \
          --fade-delta 5 \
-         --shadow-radius 11 \
+         --shadow-radius 15 \
          --shadow-green 1.0 \
          --shadow-blue 1.0 \
          --no-dock-shadow \
-         --clear-shadow \
          --no-dnd-shadow \
          --shadow-exclude '!focused'
    }
