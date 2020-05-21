@@ -57,4 +57,4 @@ URxvt.keysym.M-C-6: command:\033]710;xft:DejaVu Sans Mono:pixelsize=22\007\033]7
 URxvt.keysym.M-C-7: command:\033]710;xft:DejaVu Sans Mono:pixelsize=24\007\033]711;xft:DejaVu Sans Mono:pixelsize=24\007
 URxvt.keysym.M-C-8: command:\033]710;xft:DejaVu Sans Mono:pixelsize=26\007\033]711;xft:DejaVu Sans Mono:pixelsize=26\007
 URxvt.keysym.M-C-9: command:\033]710;xft:DejaVu Sans Mono:pixelsize=28\007\033]711;xft:DejaVu Sans Mono:pixelsize=28\007
-URxvt.keysym.M-C-0: command:\033]710;*-lode sans mono-*-16-*\007\033]711;*-lode sans mono-*-16-*\007
+URxvt.keysym.M-C-0: command:\033]710;xft:Lode Sans Mono:pixelsize=12\007\033]711;xft:Lode Sans Mono:pixelsize=12\007
