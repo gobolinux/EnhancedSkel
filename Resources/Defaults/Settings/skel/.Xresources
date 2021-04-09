@@ -16,6 +16,10 @@ URxvt.saveLines: 100000
 URxvt.internalBorder: 0
 URxvt.termName: rxvt
 
+URxvt*scrollTtyOutput: false
+URxvt*scrollWithBuffer: true
+URxvt*scrollTtyKeypress: true
+
 URxvt.clipboard.autocopy: true
 URxvt.keysym.S-Insert: \033[2$
 URxvt.keysym.C-S-Up: \033[1;6A
