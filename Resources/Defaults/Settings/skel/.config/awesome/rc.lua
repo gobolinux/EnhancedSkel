@@ -328,7 +328,11 @@ root.buttons(awful.util.table.join(
 
 local function screenshot()
    local name = os.getenv("HOME") .. "/screenshot-" .. os.date("%Y-%m-%d-%H-%M-%S") .. ".png"
-   os.execute("import "..name.."; cat "..name.." | xclip -i -selection clipboard -t image/png")
+
+   os.execute([[ps aux | grep '[i]mport' && killall import || {
+      ( import ~/]]..name.." && cat  ~/"..name..[[ | xclip -i -selection clipboard -t image/png ) &
+   }]])
+
    naughty.notify({ preset = naughty.config.presets.normal,
                     title = "Screen captured",
                     text = "Screenshot saved to"..name})
