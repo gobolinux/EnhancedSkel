@@ -330,12 +330,14 @@ local function screenshot()
    local name = os.getenv("HOME") .. "/screenshot-" .. os.date("%Y-%m-%d-%H-%M-%S") .. ".png"
 
    os.execute([[ps aux | grep '[i]mport' && killall import || {
-      ( import ~/]]..name.." && cat  ~/"..name..[[ | xclip -i -selection clipboard -t image/png ) &
+      ( import ]]..name.." && ( cat "..name..[[ | xclip -i -selection clipboard -t image/png && \
+        echo 'naughty = require("naughty");
+              naughty.notify({ preset = naughty.config.presets.normal,
+                               title = "Screen captured",
+                               text = "Screenshot saved to ]]..name..[["})
+        ' | awesome-client )
+      ) &
    }]])
-
-   naughty.notify({ preset = naughty.config.presets.normal,
-                    title = "Screen captured",
-                    text = "Screenshot saved to"..name})
 end
 
 -- Key bindings
