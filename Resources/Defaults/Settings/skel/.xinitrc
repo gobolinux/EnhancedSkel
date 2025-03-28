@@ -1,3 +1,4 @@
+numlockx &
 xsetroot -solid '#000000' -cursor_name 'left_ptr'
 
 # Load user preferences
@@ -31,4 +32,4 @@ xsetroot -solid '#000000' -cursor_name 'left_ptr'
 [ -x /bin/twm    ] && { 
    xsetroot -solid '#203040' -cursor_name 'left_ptr'
    exec twm
-}   
+}
